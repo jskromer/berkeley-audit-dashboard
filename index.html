@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Berkeley Financial Condition: 2022 vs 2026 Audit Comparison</title>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
-<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:"Source Sans 3",sans-serif;background:#f4f1eb}#loading{display:flex;align-items:center;justify-content:center;height:100vh;color:#4a5568;font-size:14px}</style>
-</head><body>
-<div id="root"><div id="loading">Loading dashboard...</div></div>
+<style>* { margin:0; padding:0; box-sizing:border-box; } body { font-family:'Source Sans 3',sans-serif; background:#f4f1eb; }</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
-<script>window.PropTypes=window.PropTypes||PropTypes;</script>
+<script>window.PropTypes = window.PropTypes || PropTypes;</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.12.7/Recharts.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+</head>
+<body>
+<div id="root"><div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#4a5568;font-size:14px">Loading dashboard...</div></div>
 <script type="text/babel">
 const { useState } = React;
 const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Line, Area, ReferenceLine } = Recharts;
@@ -20,265 +22,408 @@ const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveC
 const C = {
   navy: "#1a2744", slate: "#2d3a4a", steel: "#4a5568", fog: "#8896a7",
   ice: "#c5d0dc", cream: "#f4f1eb", sand: "#e8e2d6",
-  warn: "#c4553a", warnLight: "#e8927d",
-  gold: "#d4a843", goldLight: "#e8cc7a",
-  teal: "#2a7d6e", tealLight: "#5aab9a",
-  blue: "#3a6ea5", blueLight: "#6a9ec5",
+  warn: "#c4553a", warnLight: "#e8927d", gold: "#d4a843",
+  teal: "#2a7d6e", tealLight: "#5aab9a", blue: "#3a6ea5", green: "#3a8a5c",
 };
 
-const revExpData = [
-  { fy:"FY16", rev:352, exp:327 }, { fy:"FY17", rev:366, exp:314 },
-  { fy:"FY18", rev:368, exp:366 }, { fy:"FY19", rev:407, exp:388 },
-  { fy:"FY20", rev:401, exp:417 }, { fy:"FY21", rev:412, exp:393 },
-  { fy:"FY22", rev:487, exp:316 }, { fy:"FY23", rev:477, exp:387 },
-  { fy:"FY24", rev:472, exp:448 }, { fy:"FY25", rev:475, exp:435 },
-];
+const SectionTitle = ({ children, sub }) => (
+  <div style={{ marginBottom: 12 }}>
+    <h3 style={{ fontFamily: "'Libre Baskerville',Georgia,serif", fontSize: 16, fontWeight: 700, color: C.navy, margin: 0 }}>{children}</h3>
+    {sub && <p style={{ fontFamily: "'Source Sans 3',sans-serif", fontSize: 11.5, color: C.fog, margin: "2px 0 0" }}>{sub}</p>}
+  </div>
+);
 
-const pensionData = [
-  { fy:"FY16", v:642.7 }, { fy:"FY17", v:702.1 }, { fy:"FY18", v:740.3 },
-  { fy:"FY19", v:706.6 }, { fy:"FY20", v:741.2 }, { fy:"FY21", v:757.8 },
-  { fy:"FY22", v:482.5 }, { fy:"FY23", v:720.0 }, { fy:"FY24", v:743.9 },
-  { fy:"FY25", v:694.8 },
-];
+const Card = ({ children, style }) => (
+  <div style={{ background: "#fff", borderRadius: 6, border: `1px solid ${C.ice}`, padding: 18, ...style }}>{children}</div>
+);
 
-const retireHealthData = [
-  { fy:"FY16", v:147.2 }, { fy:"FY17", v:130.7 }, { fy:"FY18", v:116.0 },
-  { fy:"FY19", v:124.5 }, { fy:"FY20", v:165.5 }, { fy:"FY21", v:132.6 },
-  { fy:"FY22", v:86.7 }, { fy:"FY23", v:92.4 }, { fy:"FY24", v:84.8 },
-  { fy:"FY25", v:43.4 },
+const Callout = ({ children, icon = "⚠" }) => (
+  <Card style={{ background: C.sand, borderColor: C.gold }}>
+    <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+      <div style={{ fontSize: 20 }}>{icon}</div>
+      <div style={{ fontSize: 12.5, lineHeight: 1.6, color: C.slate }}>{children}</div>
+    </div>
+  </Card>
+);
+
+const Metric = ({ label, v2022, v2026, direction, unit = "" }) => {
+  const worse = direction === "up" ? "↑" : direction === "down" ? "↓" : "→";
+  const color = direction === "worse" ? C.warn : direction === "better" ? C.teal : C.steel;
+  return (
+    <div style={{ padding: "10px 12px", background: "#fafaf7", borderRadius: 5, border: `1px solid ${C.ice}` }}>
+      <div style={{ fontSize: 10, color: C.fog, fontWeight: 600, marginBottom: 6 }}>{label}</div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <div>
+          <span style={{ fontSize: 9, color: C.fog }}>2022: </span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: C.fog, fontFamily: "'Libre Baskerville',Georgia,serif" }}>{v2022}{unit}</span>
+        </div>
+        <div style={{ fontSize: 14, color: C.fog }}>→</div>
+        <div>
+          <span style={{ fontSize: 9, color: C.fog }}>2026: </span>
+          <span style={{ fontSize: 14, fontWeight: 700, color, fontFamily: "'Libre Baskerville',Georgia,serif" }}>{v2026}{unit}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (!active || !payload) return null;
+  return (
+    <div style={{ background: C.navy, padding: "6px 10px", borderRadius: 4 }}>
+      <div style={{ color: C.ice, fontSize: 10, marginBottom: 3 }}>{label}</div>
+      {payload.map((p, i) => (
+        <div key={i} style={{ color: "#fff", fontSize: 11 }}>
+          <span style={{ color: p.color || p.fill, marginRight: 5 }}>●</span>
+          {p.name}: ${typeof p.value === "number" ? p.value.toFixed(1) : p.value}M
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Data
+const revExpFull = [
+  { fy: "FY16", rev: 352, exp: 327 }, { fy: "FY17", rev: 366, exp: 314 },
+  { fy: "FY18", rev: 368, exp: 366 }, { fy: "FY19", rev: 407, exp: 388 },
+  { fy: "FY20", rev: 401, exp: 417 }, { fy: "FY21", rev: 412, exp: 393 },
+  { fy: "FY22", rev: 487, exp: 316 }, { fy: "FY23", rev: 477, exp: 387 },
+  { fy: "FY24", rev: 472, exp: 448 }, { fy: "FY25", rev: 475, exp: 435 },
 ];
 
 const expByFunc = [
-  { name:"Public Safety", a22:"$152.9M", a26:"$162.2M", g22:"+23%", g26:"+6%" },
-  { name:"Culture & Rec", a22:"$46.6M", a26:"$68.7M", g22:"+3%", g26:"+47%" },
-  { name:"Health & Welfare", a22:"$26.4M", a26:"$54.8M", g22:"+65%", g26:"+107%" },
-  { name:"Community Dev", a22:"$23.4M", a26:"$51.3M", g22:"+31%", g26:"+119%" },
-  { name:"General Govt", a22:"$48.9M", a26:"$65.5M", g22:"-2%", g26:"+34%" },
-  { name:"Highways/Streets", a22:"$23.5M", a26:"$25.2M", g22:"-12%", g26:"+7%" },
+  { name: "Public Safety", fy16: 152.9, fy25: 162.2 },
+  { name: "Culture & Rec", fy16: 46.6, fy25: 68.7 },
+  { name: "Health & Welfare", fy16: 26.4, fy25: 54.8 },
+  { name: "Comm Dev & Housing", fy16: 23.4, fy25: 51.3 },
+  { name: "General Govt", fy16: 48.9, fy25: 65.5 },
+  { name: "Highways/Streets", fy16: 23.5, fy25: 25.2 },
 ];
 
-const Tip = ({ active, payload, label }) => {
-  if (!active || !payload) return null;
-  return (<div style={{ background:C.navy, padding:"8px 12px", borderRadius:4 }}>
-    <div style={{ color:C.ice, fontSize:11, fontFamily:"'Source Sans 3',sans-serif", marginBottom:4 }}>{label}</div>
-    {payload.map((p,i) => (<div key={i} style={{ color:"#fff", fontSize:12, fontFamily:"'Source Sans 3',sans-serif" }}>
-      <span style={{ color:p.color||p.fill, marginRight:6 }}>●</span>{p.name}: ${p.value}M
-    </div>))}
-  </div>);
-};
+const pensionData = [
+  { fy: "FY16", v: 642.7 }, { fy: "FY17", v: 702.1 }, { fy: "FY18", v: 740.3 },
+  { fy: "FY19", v: 706.6 }, { fy: "FY20", v: 741.2 }, { fy: "FY21", v: 757.8 },
+  { fy: "FY22", v: 482.5 }, { fy: "FY23", v: 720.0 }, { fy: "FY24", v: 743.9 },
+  { fy: "FY25", v: 694.8 },
+];
 
-const Card = ({ children, style }) => (<div style={{ background:"#fff", borderRadius:6, border:`1px solid ${C.ice}`, padding:20, ...style }}>{children}</div>);
-const H3 = ({ children, sub }) => (<div style={{ marginBottom:14 }}><h3 style={{ fontFamily:"'Libre Baskerville',Georgia,serif", fontSize:16, fontWeight:700, color:C.navy, margin:0 }}>{children}</h3>{sub && <p style={{ fontFamily:"'Source Sans 3',sans-serif", fontSize:12, color:C.fog, margin:"3px 0 0", lineHeight:1.4 }}>{sub}</p>}</div>);
-const Callout = ({ icon, children, color=C.gold }) => (<div style={{ background:C.sand, border:`1px solid ${color}`, borderLeft:`4px solid ${color}`, borderRadius:4, padding:"14px 16px", display:"flex", gap:10, alignItems:"flex-start" }}><span style={{ fontSize:18, lineHeight:1, flexShrink:0 }}>{icon}</span><div style={{ fontSize:13, lineHeight:1.6, color:C.slate, fontFamily:"'Source Sans 3',sans-serif" }}>{children}</div></div>);
-const Stat = ({ value, label, color=C.navy, sub }) => (<div style={{ textAlign:"center", padding:"12px 8px" }}><div style={{ fontFamily:"'Libre Baskerville',Georgia,serif", fontSize:24, fontWeight:700, color, letterSpacing:"-1px" }}>{value}</div><div style={{ fontFamily:"'Source Sans 3',sans-serif", fontSize:11, color:C.steel, marginTop:3, lineHeight:1.3 }}>{label}</div>{sub && <div style={{ fontFamily:"'Source Sans 3',sans-serif", fontSize:10, color:C.fog, marginTop:2 }}>{sub}</div>}</div>);
-const CompRow = ({ label, v2022, v2026, delta, deltaColor }) => (<div style={{ display:"grid", gridTemplateColumns:"2fr 1.5fr 1.5fr 1.5fr", padding:"8px 12px", borderBottom:`1px solid ${C.ice}`, alignItems:"center" }}><div style={{ fontSize:12.5, fontWeight:600, color:C.slate }}>{label}</div><div style={{ fontSize:12.5, color:C.fog, textAlign:"center" }}>{v2022}</div><div style={{ fontSize:12.5, color:C.navy, fontWeight:600, textAlign:"center" }}>{v2026}</div><div style={{ fontSize:12.5, fontWeight:700, color:deltaColor||C.warn, textAlign:"center" }}>{delta}</div></div>);
+const opebData = [
+  { fy: "FY16", v: 147.2 }, { fy: "FY17", v: 130.7 }, { fy: "FY18", v: 116.0 },
+  { fy: "FY19", v: 124.5 }, { fy: "FY20", v: 165.5 }, { fy: "FY21", v: 132.6 },
+  { fy: "FY22", v: 86.7 }, { fy: "FY23", v: 92.4 }, { fy: "FY24", v: 84.8 },
+  { fy: "FY25", v: 43.4 },
+];
 
-function App() {
-  const [tab, setTab] = useState("overview");
+const capitalData = [
+  { fy: "FY17", v: 603.5 }, { fy: "FY19", v: 850 }, { fy: "FY21", v: 1200 }, { fy: "FY24", v: 1800 },
+];
+
+function AuditComparison() {
+  const [tab, setTab] = useState("headline");
   const tabs = [
-    { id:"overview", label:"Overview" },
-    { id:"shifts", label:"What Changed" },
-    { id:"deficit", label:"Structural Deficit" },
-    { id:"longterm", label:"Long-Term Risks" },
-    { id:"homeless", label:"Homeless Lens" },
+    { id: "headline", label: "Headline Shift" },
+    { id: "indicators", label: "Key Indicators" },
+    { id: "spending", label: "Spending & Deficit" },
+    { id: "liabilities", label: "Long-Term Risks" },
+    { id: "homeless", label: "Homeless Spending" },
   ];
 
   return (
-    <div style={{ fontFamily:"'Source Sans 3',sans-serif", background:C.cream, minHeight:"100vh" }}>
+    <div style={{ fontFamily: "'Source Sans 3',sans-serif", background: C.cream, minHeight: "100vh" }}>
       <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet" />
-      <div style={{ background:C.navy, color:"#fff", padding:"24px 24px 16px" }}>
-        <div style={{ display:"flex", gap:12, alignItems:"flex-start" }}>
-          <div style={{ width:4, height:44, background:C.gold, borderRadius:2, flexShrink:0, marginTop:2 }} />
+
+      <div style={{ background: C.navy, color: "#fff", padding: "24px 24px 16px" }}>
+        <div style={{ display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 4 }}>
+          <div style={{ width: 4, height: 40, background: C.gold, borderRadius: 2, flexShrink: 0, marginTop: 2 }} />
           <div>
-            <h1 style={{ fontFamily:"'Libre Baskerville',Georgia,serif", fontSize:20, fontWeight:700, margin:0, lineHeight:1.2 }}>Berkeley Financial Condition: 2022 vs. 2026 Audit</h1>
-            <p style={{ fontSize:12.5, color:C.ice, margin:"5px 0 0", lineHeight:1.4 }}>Side-by-side comparison of Jenny Wong's two financial condition audits — what changed in four years</p>
+            <h1 style={{ fontFamily: "'Libre Baskerville',Georgia,serif", fontSize: 20, fontWeight: 700, margin: 0, lineHeight: 1.2 }}>
+              Berkeley Financial Condition: 2022 vs. 2026 Audit
+            </h1>
+            <p style={{ fontSize: 12, color: C.ice, margin: "5px 0 0", lineHeight: 1.4 }}>
+              How Berkeley's fiscal picture changed between Jenny Wong's two audits — and where $21.7M in homeless spending fits
+            </p>
           </div>
         </div>
-        <div style={{ display:"flex", gap:5, marginTop:14, flexWrap:"wrap" }}>
-          {tabs.map(t => (<button key={t.id} onClick={() => setTab(t.id)} style={{ padding:"6px 13px", borderRadius:4, border:"none", fontSize:12, fontWeight:tab===t.id?700:400, fontFamily:"'Source Sans 3',sans-serif", cursor:"pointer", background:tab===t.id?C.gold:"rgba(255,255,255,0.08)", color:tab===t.id?C.navy:C.ice }}>{t.label}</button>))}
+        <div style={{ display: "flex", gap: 5, marginTop: 14, flexWrap: "wrap" }}>
+          {tabs.map(t => (
+            <button key={t.id} onClick={() => setTab(t.id)} style={{
+              padding: "6px 12px", borderRadius: 4, border: "none", fontSize: 12,
+              fontWeight: tab === t.id ? 700 : 400, fontFamily: "'Source Sans 3',sans-serif",
+              background: tab === t.id ? C.gold : "rgba(255,255,255,0.08)",
+              color: tab === t.id ? C.navy : C.ice, cursor: "pointer",
+            }}>{t.label}</button>
+          ))}
         </div>
       </div>
 
-      <div style={{ padding:"18px 22px 40px", maxWidth:920, margin:"0 auto" }}>
+      <div style={{ padding: "18px 22px 36px", maxWidth: 920, margin: "0 auto" }}>
 
-        {tab === "overview" && (<div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
-            <Card style={{ borderTop:`3px solid ${C.blue}` }}>
-              <div style={{ fontSize:11, fontWeight:700, color:C.blue, textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>2022 Audit (FY12-21)</div>
-              <div style={{ fontFamily:"'Libre Baskerville',Georgia,serif", fontSize:14, fontWeight:700, color:C.navy, marginBottom:8, lineHeight:1.3 }}>"Near-term financial position is strong"</div>
-              <div style={{ fontSize:12.5, color:C.steel, lineHeight:1.55 }}>Revenues grew 25% and outpaced expenses 8 of 10 years. Long-term risks in pensions, OPEB, and infrastructure. Tone was cautiously optimistic.</div>
-            </Card>
-            <Card style={{ borderTop:`3px solid ${C.warn}` }}>
-              <div style={{ fontSize:11, fontWeight:700, color:C.warn, textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>2026 Audit (FY16-25)</div>
-              <div style={{ fontFamily:"'Libre Baskerville',Georgia,serif", fontSize:14, fontWeight:700, color:C.navy, marginBottom:8, lineHeight:1.3 }}>"Structural Deficit Poses Risk to Financial Sustainability"</div>
-              <div style={{ fontSize:12.5, color:C.steel, lineHeight:1.55 }}>Tone shifted dramatically. $32-33M structural deficit is the headline. One-time fixes deplete reserves and pension trust. Unfunded capital grew to $1.8B. H&W doubled.</div>
-            </Card>
-          </div>
-          <Card>
-            <H3 sub="Key metrics from each audit compared side-by-side">At a Glance: Four Years of Change</H3>
-            <div style={{ background:C.navy, display:"grid", gridTemplateColumns:"2fr 1.5fr 1.5fr 1.5fr", padding:"8px 12px", borderRadius:"4px 4px 0 0" }}>
-              {["Indicator", "2022 Audit", "2026 Audit", "Direction"].map(h => (<div key={h} style={{ fontSize:11, fontWeight:700, color:"#fff", textAlign:h==="Indicator"?"left":"center" }}>{h}</div>))}
+        {tab === "headline" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {/* The big headline shift */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <Card style={{ borderLeft: `4px solid ${C.teal}` }}>
+                <div style={{ fontSize: 10, color: C.fog, fontWeight: 600, marginBottom: 6 }}>MAY 2022 AUDIT</div>
+                <div style={{ fontFamily: "'Libre Baskerville',Georgia,serif", fontSize: 15, fontWeight: 700, color: C.teal, lineHeight: 1.3, marginBottom: 8 }}>
+                  "Pension Liabilities and Infrastructure Need Attention"
+                </div>
+                <div style={{ fontSize: 12, color: C.steel, lineHeight: 1.5 }}>
+                  Covers FY 2012–2021. Near-term outlook <strong>strong</strong>. Revenues grew 25%, outpaced expenses 8 of 10 years. Long-term risks flagged but manageable.
+                </div>
+                <div style={{ marginTop: 10, padding: "8px 10px", background: "#eef7f5", borderRadius: 4, fontSize: 11, color: C.teal }}>
+                  <strong>Tone:</strong> Cautiously optimistic. Problems are future-oriented.
+                </div>
+              </Card>
+              <Card style={{ borderLeft: `4px solid ${C.warn}` }}>
+                <div style={{ fontSize: 10, color: C.fog, fontWeight: 600, marginBottom: 6 }}>APRIL 2026 AUDIT</div>
+                <div style={{ fontFamily: "'Libre Baskerville',Georgia,serif", fontSize: 15, fontWeight: 700, color: C.warn, lineHeight: 1.3, marginBottom: 8 }}>
+                  "Structural Deficit Poses Risk to Financial Sustainability"
+                </div>
+                <div style={{ fontSize: 12, color: C.steel, lineHeight: 1.5 }}>
+                  Covers FY 2016–2025. Near-term now includes a <strong>structural deficit</strong> of $32-33M. One-time fixes masking deeper problems. Long-term risks have worsened.
+                </div>
+                <div style={{ marginTop: 10, padding: "8px 10px", background: "#fef0ed", borderRadius: 4, fontSize: 11, color: C.warn }}>
+                  <strong>Tone:</strong> Alarm. The future problems have arrived.
+                </div>
+              </Card>
             </div>
-            <CompRow label="Overall Tone" v2022="Cautiously strong" v2026="Structural deficit alarm" delta="⚠ Worse" deltaColor={C.warn} />
-            <CompRow label="Govt Revenue Growth" v2022="+25% (FY12-21)" v2026="+35% (FY16-25)" delta="↑ Higher" deltaColor={C.teal} />
-            <CompRow label="Govt Expense Growth" v2022="+20% (FY12-21)" v2026="+33% (FY16-25)" delta="↑ Faster" deltaColor={C.warn} />
-            <CompRow label="H&W Expense Growth" v2022="+65%" v2026="+107%" delta="⚠ Doubled" deltaColor={C.warn} />
-            <CompRow label="Unfunded Capital Needs" v2022="$1.2 Billion" v2026="$1.8 Billion" delta="+$600M" deltaColor={C.warn} />
-            <CompRow label="Net Pension Liability" v2022="$658M (FY21)" v2026="$695M (FY25)" delta="+$37M" deltaColor={C.gold} />
-            <CompRow label="Retiree Healthcare" v2022="$115M (FY21)" v2026="$43M (FY25)" delta="-$72M ✓" deltaColor={C.teal} />
-            <CompRow label="Pension Funded Ratio" v2022="66% (High Risk)" v2026="66% (High Risk)" delta="→ Same" deltaColor={C.gold} />
-            <CompRow label="Reserve Status" v2022="Off track (30% goal)" v2026="On track (20-30%)" delta="✓ Improved" deltaColor={C.teal} />
-            <CompRow label="GF Structural Deficit" v2022="Not highlighted" v2026="$32-33M projected" delta="⚠ NEW" deltaColor={C.warn} />
-            <CompRow label="Personnel Spending" v2022="Not detailed" v2026="$308M→$371M (+20%)" delta="↑ Growing" deltaColor={C.gold} />
-            <CompRow label="Population" v2022="~117K (FY21)" v2026="~128K (FY25)" delta="+10%" deltaColor={C.teal} />
-            <CompRow label="Property Values" v2022="$21.3B (FY21)" v2026="$28.2B (FY25)" delta="+32%" deltaColor={C.teal} />
-          </Card>
-        </div>)}
 
-        {tab === "shifts" && (<div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-          <Card>
-            <H3 sub="Inflation-adjusted to 2025 dollars (from 2026 audit). FY20 COVID dip visible.">Revenue vs. Expenses (FY16-FY25)</H3>
-            <ResponsiveContainer width="100%" height={280}>
-              <ComposedChart data={revExpData} margin={{ top:10, right:20, left:10, bottom:0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={C.ice} />
-                <XAxis dataKey="fy" tick={{ fontSize:11, fill:C.fog }} />
-                <YAxis tick={{ fontSize:11, fill:C.fog }} tickFormatter={v=>`$${v}M`} domain={[250,520]} />
-                <Tooltip content={<Tip />} /> <Legend wrapperStyle={{ fontSize:11 }} />
-                <Line type="monotone" dataKey="rev" name="Revenue" stroke={C.teal} strokeWidth={2.5} dot={{ r:3 }} />
-                <Line type="monotone" dataKey="exp" name="Expenses" stroke={C.warn} strokeWidth={2.5} dot={{ r:3 }} />
-                <ReferenceLine x="FY20" stroke={C.fog} strokeDasharray="4 4" label={{ value:"COVID", position:"top", fontSize:9, fill:C.fog }} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </Card>
-          <Card>
-            <H3 sub="Growth rates measured from start to end of each audit's 10-year window">Expense Growth by Function: 2022 vs. 2026 Audit</H3>
-            <div style={{ background:C.navy, display:"grid", gridTemplateColumns:"1.8fr 1fr 1fr 1fr 1fr", padding:"8px 10px", borderRadius:"4px 4px 0 0" }}>
-              {["Function", "FY21 Level", "FY25 Level", "Growth (2022)", "Growth (2026)"].map(h => (<div key={h} style={{ fontSize:10.5, fontWeight:700, color:"#fff", textAlign:h==="Function"?"left":"center" }}>{h}</div>))}
-            </div>
-            {expByFunc.map((r,i) => (<div key={i} style={{ display:"grid", gridTemplateColumns:"1.8fr 1fr 1fr 1fr 1fr", padding:"7px 10px", borderBottom:`1px solid ${C.ice}`, background:r.name.includes("Health")||r.name.includes("Community")?"#fff8ee":"#fff" }}>
-              <div style={{ fontSize:12, fontWeight:600, color:C.slate }}>{r.name}</div>
-              <div style={{ fontSize:12, color:C.fog, textAlign:"center" }}>{r.a22}</div>
-              <div style={{ fontSize:12, color:C.navy, fontWeight:600, textAlign:"center" }}>{r.a26}</div>
-              <div style={{ fontSize:12, color:C.fog, textAlign:"center" }}>{r.g22}</div>
-              <div style={{ fontSize:12, fontWeight:700, color:parseInt(r.g26)>50?C.warn:C.steel, textAlign:"center" }}>{r.g26}</div>
-            </div>))}
-          </Card>
-          <Callout icon="📊"><strong>The Big Shift:</strong> In the 2022 audit, Health & Welfare had grown 65% — already the fastest after Public Safety. By the 2026 audit, it <strong>more than doubled (+107%)</strong>, from $26.4M to $54.8M. Community Development & Housing grew even faster at +119%. Expense growth (33%) now nearly matches revenue growth (35%), erasing the comfortable margin from 2022.</Callout>
-        </div>)}
-
-        {tab === "deficit" && (<div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:12 }}>
-            <Card><Stat value="$32-33M" label="Projected GF Deficit" sub="FY 2027-2028" color={C.warn} /></Card>
-            <Card><Stat value="$371M" label="Personnel Spending" sub="Up from $308M in FY16" color={C.navy} /></Card>
-            <Card><Stat value="1,747" label="Budgeted FTEs" sub="Up 30% from 1,336 in FY16" color={C.gold} /></Card>
-          </div>
-          <Card>
-            <H3>NEW in 2026: The Structural Deficit</H3>
-            <div style={{ fontSize:13, lineHeight:1.65, color:C.steel }}>
-              <p style={{ margin:"0 0 10px" }}>The most striking difference between the two audits is the emergence of a <strong>structural General Fund deficit</strong> as the headline finding. The 2022 audit didn't flag this — the tone was that near-term finances were strong despite long-term risks.</p>
-              <p style={{ margin:"0 0 10px" }}>By 2026, the City faces a projected <strong>$32M deficit in FY2027 and $33M in FY2028</strong>. The City has used one-time fixes — raiding the workers' comp fund ($4.7M), pulling from the S115 pension trust ($3M) — to paper over the gap. These moves weaken the City's long-term position without addressing the structural imbalance.</p>
-              <p style={{ margin:0 }}>The 2026 audit added an entirely new section on <strong>"Budgetary Practices"</strong> that didn't exist in 2022, examining how one-time balancing measures and enterprise fund deficits compound the problem.</p>
-            </div>
-          </Card>
-          <Card>
-            <H3 sub="Personnel is ~50% of citywide budget and ~67% of General Fund">What's Driving the Deficit</H3>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
-              {[
-                { cat:"Salaries & Wages", from:"$181.3M", to:"$224.6M", delta:"+$43.3M", pct:"34.8% of GF baseline" },
-                { cat:"Retirement Benefits", from:"$73.6M", to:"$97.6M", delta:"+$24.0M", pct:"17.7% of GF baseline" },
-                { cat:"Healthcare", from:"$30.3M", to:"$40.8M", delta:"+$10.5M", pct:"" },
-                { cat:"Public Liability Insurance", from:"—", to:"$10.5M", delta:"Statewide trend", pct:"3.6% of GF baseline" },
-              ].map((r,i) => (<div key={i} style={{ padding:"10px 12px", borderRadius:5, border:`1px solid ${C.ice}`, background:"#fafaf7" }}>
-                <div style={{ fontSize:11, color:C.fog, fontWeight:600 }}>{r.cat}</div>
-                <div style={{ fontSize:20, fontWeight:700, color:C.warn, fontFamily:"'Libre Baskerville',Georgia,serif", margin:"4px 0 2px" }}>{r.delta}</div>
-                <div style={{ fontSize:10.5, color:C.fog }}>{r.from} → {r.to}</div>
-                {r.pct && <div style={{ fontSize:10, color:C.steel, marginTop:2 }}>{r.pct}</div>}
-              </div>))}
-            </div>
-          </Card>
-          <Callout icon="⚠"><strong>One-Time Fixes Eroding Long-Term Health:</strong> To balance FY2025, the City redirected $4.7M from workers' comp (already $2M underfunded) and pulled $3M from the S115 pension trust. The City is now considering a 0.5% sales tax (~$9-10M/year) for the 2026 ballot. The auditor recommends a formal policy requiring a structurally balanced budget.</Callout>
-        </div>)}
-
-        {tab === "longterm" && (<div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-          <Card>
-            <H3 sub="In millions, 2025 dollars. Peak FY21 at $757.8M. FY22 dip from investment gains.">Net Pension Liability (FY16-FY25)</H3>
-            <ResponsiveContainer width="100%" height={220}>
-              <ComposedChart data={pensionData} margin={{ top:10, right:20, left:10, bottom:0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={C.ice} />
-                <XAxis dataKey="fy" tick={{ fontSize:11, fill:C.fog }} />
-                <YAxis tick={{ fontSize:11, fill:C.fog }} tickFormatter={v=>`$${v}M`} domain={[400,800]} />
-                <Tooltip content={<Tip />} />
-                <Area type="monotone" dataKey="v" name="Net Pension" fill={C.navy} fillOpacity={0.12} stroke={C.navy} strokeWidth={2.5} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </Card>
-          <Card>
-            <H3 sub="In millions, 2025 dollars. Down $103.8M — the one clear bright spot.">Retiree Healthcare Liability (FY16-FY25)</H3>
-            <ResponsiveContainer width="100%" height={180}>
-              <ComposedChart data={retireHealthData} margin={{ top:10, right:20, left:10, bottom:0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={C.ice} />
-                <XAxis dataKey="fy" tick={{ fontSize:11, fill:C.fog }} />
-                <YAxis tick={{ fontSize:11, fill:C.fog }} tickFormatter={v=>`$${v}M`} domain={[0,180]} />
-                <Tooltip content={<Tip />} />
-                <Area type="monotone" dataKey="v" name="Retiree Healthcare" fill={C.teal} fillOpacity={0.12} stroke={C.teal} strokeWidth={2.5} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </Card>
-          <Card>
-            <H3>What Improved vs. What Got Worse</H3>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
-              <div style={{ padding:14, borderRadius:6, background:"#eef7f5", border:`1px solid ${C.tealLight}` }}>
-                <div style={{ fontSize:12, fontWeight:700, color:C.teal, marginBottom:8 }}>✓ IMPROVED</div>
-                {["Retiree healthcare liability: −$103.8M", "Reserves: now on track (21.3%)", "Net position: −$117M → +$198M", "Bond ratings: maintained AA+/Aa1", "Liquidity ratio: recovered from FY21 dip", "GO bond debt/resident: peaked, declining"].map((t,i) => (<div key={i} style={{ fontSize:12, color:C.steel, lineHeight:1.5, paddingLeft:8, borderLeft:`2px solid ${C.tealLight}`, marginBottom:4 }}>{t}</div>))}
+            <Card>
+              <SectionTitle sub="What changed between the two audits">The Big Picture</SectionTitle>
+              <div style={{ fontSize: 12.5, lineHeight: 1.65, color: C.steel }}>
+                <p style={{ margin: "0 0 8px" }}>In 2022, Jenny Wong's audit told a story of a city with <strong>strong near-term finances</strong> but looming long-term risks. Four years later, the sequel is starkly different: Berkeley now faces a <strong>structural General Fund deficit</strong> projected at $32M in FY 2027 and $33M in FY 2028, and has been using one-time fixes — raiding the workers' comp fund, pulling $3M from the pension trust — just to balance the budget.</p>
+                <p style={{ margin: "0 0 8px" }}>The long-term risks flagged in 2022 have all gotten worse: unfunded capital needs grew from $1.2B to <strong>$1.8 billion</strong>. Pension liabilities remain "high risk" at 66% funded. And the two fastest-growing expense categories — <strong>Health & Welfare (+107%)</strong> and <strong>Community Development & Housing (+119%)</strong> — are precisely where homeless services live.</p>
+                <p style={{ margin: 0 }}>The 2026 audit adds an entirely new section on <strong>Budgetary Practices</strong> that didn't exist in 2022, documenting how one-time balancing strategies are putting fund sustainability at risk.</p>
               </div>
-              <div style={{ padding:14, borderRadius:6, background:"#fef5f3", border:`1px solid ${C.warnLight}` }}>
-                <div style={{ fontSize:12, fontWeight:700, color:C.warn, marginBottom:8 }}>⚠ WORSE / NEW RISK</div>
-                {["Structural deficit: $32-33M (new finding)", "Unfunded capital: $1.2B → $1.8B", "H&W spending: +65% → +107%", "Personnel costs: +$62.7M (+20%)", "Enterprise fund structural deficits", "S115 Trust: raided for GF balance", "Lease revenue: down 48%", "Unemployment: trending up (5.0%)"].map((t,i) => (<div key={i} style={{ fontSize:12, color:C.steel, lineHeight:1.5, paddingLeft:8, borderLeft:`2px solid ${C.warnLight}`, marginBottom:4 }}>{t}</div>))}
+            </Card>
+
+            <Card>
+              <SectionTitle>Revenue vs. Expenses (Full Timeline, 2025 dollars)</SectionTitle>
+              <ResponsiveContainer width="100%" height={240}>
+                <ComposedChart data={revExpFull} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={C.ice} />
+                  <XAxis dataKey="fy" tick={{ fontSize: 10, fill: C.fog }} />
+                  <YAxis tick={{ fontSize: 10, fill: C.fog }} tickFormatter={v => `$${v}M`} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend wrapperStyle={{ fontSize: 10 }} />
+                  <Line type="monotone" dataKey="rev" name="Revenue" stroke={C.teal} strokeWidth={2.5} dot={{ r: 2.5 }} />
+                  <Line type="monotone" dataKey="exp" name="Expenses" stroke={C.warn} strokeWidth={2.5} dot={{ r: 2.5 }} />
+                  <ReferenceLine x="FY20" stroke={C.fog} strokeDasharray="4 4" label={{ value: "COVID", fontSize: 9, fill: C.fog }} />
+                </ComposedChart>
+              </ResponsiveContainer>
+              <div style={{ fontSize: 10.5, color: C.fog, textAlign: "center", marginTop: 4 }}>
+                Note the FY22 expense dip reflects accounting changes, not actual spending cuts. The structural deficit exists at the General Fund level.
               </div>
-            </div>
-          </Card>
-        </div>)}
-
-        {tab === "homeless" && (<div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-          <Card>
-            <H3>Homeless Spending in Context of Both Audits</H3>
-            <div style={{ fontSize:13, lineHeight:1.65, color:C.steel }}>
-              <p style={{ margin:"0 0 10px" }}>Neither audit specifically breaks out homeless services. But <strong>Health & Welfare</strong> — which includes homeless programs — tells a dramatic story across both audits.</p>
-              <p style={{ margin:"0 0 10px" }}>The 2026 audit shows H&W at <strong>$54.8M</strong>, up 107% from FY16. The HSPE agenda identifies <strong>$21.7M</strong> in homeless programs — roughly 40% of H&W. Community Development & Housing, which also funds homeless-related work, grew 119% to $51.3M.</p>
-              <p style={{ margin:0 }}>Combined, these two categories total <strong>$106.1M</strong> — nearly a quarter of all governmental expenses. In FY16, they totaled just $49.8M.</p>
-            </div>
-          </Card>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:12 }}>
-            <Card><Stat value="$54.8M" label="Health & Welfare (FY25)" sub="Up 107% from FY16" color={C.warn} /></Card>
-            <Card><Stat value="$21.7M" label="Homeless Programs" sub="~40% of H&W" color={C.teal} /></Card>
-            <Card><Stat value="$51.3M" label="Community Dev & Housing" sub="Up 119% from FY16" color={C.gold} /></Card>
+            </Card>
           </div>
-          <Card>
-            <H3>Competing Annual Costs</H3>
-            <div style={{ display:"flex", gap:0, alignItems:"flex-end", justifyContent:"center", padding:"20px 0 10px" }}>
-              {[
-                { label:"GF Structural\nDeficit", v:32, color:C.warn },
-                { label:"Homeless\nPrograms", v:21.7, color:C.teal },
-                { label:"Pension Annual\nPayment", v:76, color:C.navy },
-                { label:"Capital Invest\n(FY25)", v:93.3, color:C.blue },
-              ].map((d,i) => { const h=(d.v/93.3)*180; return (
-                <div key={i} style={{ display:"flex", flexDirection:"column", alignItems:"center", width:140 }}>
-                  <div style={{ fontFamily:"'Libre Baskerville',Georgia,serif", fontSize:16, fontWeight:700, color:d.color, marginBottom:6 }}>${d.v}M</div>
-                  <div style={{ width:60, height:h, background:d.color, borderRadius:"4px 4px 0 0", opacity:0.8 }} />
-                  <div style={{ fontSize:10.5, color:C.steel, marginTop:8, textAlign:"center", whiteSpace:"pre-line", fontWeight:600 }}>{d.label}</div>
-                </div>); })}
-            </div>
-          </Card>
-          <Callout icon="🔍"><strong>The Dilemma:</strong> Homeless services ($21.7M) represent roughly two-thirds of the $32M structural deficit. Yet these are among the City's most visible commitments. The 2026 audit recommends structural solutions — balanced-budget policy, enterprise fund reforms, sales tax, $300M infrastructure bond. None directly address the homeless spending trajectory within the fastest-growing budget categories.</Callout>
-        </div>)}
+        )}
 
-        <div style={{ marginTop:20, padding:"12px 0", borderTop:`1px solid ${C.ice}`, fontSize:10, color:C.fog, lineHeight:1.5 }}>
-          <strong>Sources:</strong> (1) Jenny Wong, "Berkeley's Financial Condition (FY 2012-FY 2021)," May 2022. (2) Jenny Wong, "Berkeley's Financial Condition (FY 2016-FY 2025)," April 8, 2026. (3) HSPE Agenda Package, May 2026. 2022 audit uses 2021 dollars; 2026 audit uses 2025 dollars.
+        {tab === "indicators" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <Card>
+              <SectionTitle sub="Side-by-side comparison of key metrics from each audit">Indicator Scorecard: 2022 vs. 2026</SectionTitle>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+                <Metric label="Unfunded Capital Needs" v2022="$1.2B" v2026="$1.8B" direction="worse" />
+                <Metric label="Net Pension Liability" v2022="$658M" v2026="$695M" direction="worse" />
+                <Metric label="Retiree Healthcare" v2022="$115M" v2026="$43M" direction="better" />
+                <Metric label="Pension Funded Ratio" v2022="66%" v2026="66%" direction="neutral" />
+                <Metric label="Reserves on Track?" v2022="No" v2026="Yes (21.3%)" direction="better" />
+                <Metric label="Structural Deficit" v2022="Not named" v2026="$32-33M" direction="worse" />
+                <Metric label="Govt Revenue Growth" v2022="+25%" v2026="+35%" direction="neutral" />
+                <Metric label="Govt Expense Growth" v2022="+20%" v2026="+33%" direction="worse" />
+                <Metric label="H&W Expense Growth" v2022="+65%" v2026="+107%" direction="worse" />
+                <Metric label="Population" v2022="116,761" v2026="128,348" direction="neutral" />
+                <Metric label="Property Value" v2022="$21.3B" v2026="$28.2B" direction="neutral" />
+                <Metric label="Personnel Cost" v2022="N/A" v2026="$371M" direction="neutral" />
+              </div>
+            </Card>
+
+            <Callout icon="📊">
+              <strong>What improved:</strong> Retiree healthcare liability dropped dramatically (from $115M to $43M), reserves are now on track, and net position flipped from -$117M to +$198M. <strong>What worsened:</strong> The structural deficit is now explicitly named, unfunded capital grew 50%, expense growth (33%) is outpacing revenue growth (35%), and Health & Welfare spending more than doubled. <strong>What stayed the same:</strong> Pension funded ratio stuck at 66% — still "high risk."
+            </Callout>
+          </div>
+        )}
+
+        {tab === "spending" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <Card>
+              <SectionTitle sub="Inflation-adjusted (2025 dollars). Two fastest-growing categories house homeless services.">
+                Expenses by Function: FY 2016 vs. FY 2025
+              </SectionTitle>
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={expByFunc} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={C.ice} horizontal={false} />
+                  <XAxis type="number" tick={{ fontSize: 10, fill: C.fog }} tickFormatter={v => `$${v}M`} />
+                  <YAxis dataKey="name" type="category" width={130} tick={{ fontSize: 10, fill: C.steel }} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend wrapperStyle={{ fontSize: 10 }} />
+                  <Bar dataKey="fy16" name="FY 2016" fill={C.ice} barSize={12} radius={[0, 3, 3, 0]} />
+                  <Bar dataKey="fy25" name="FY 2025" fill={C.navy} barSize={12} radius={[0, 3, 3, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </Card>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+              {[
+                { fn: "Health & Welfare", pct: "+107%", from: "$26.4M", to: "$54.8M", color: C.warn },
+                { fn: "Comm Dev & Housing", pct: "+119%", from: "$23.4M", to: "$51.3M", color: C.gold },
+                { fn: "Culture & Rec", pct: "+47%", from: "$46.6M", to: "$68.7M", color: C.teal },
+              ].map(item => (
+                <Card key={item.fn}>
+                  <div style={{ fontSize: 10, color: C.fog, fontWeight: 600 }}>{item.fn}</div>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: item.color, fontFamily: "'Libre Baskerville',Georgia,serif", letterSpacing: "-1px" }}>{item.pct}</div>
+                  <div style={{ fontSize: 10, color: C.fog }}>{item.from} → {item.to}</div>
+                </Card>
+              ))}
+            </div>
+
+            <Callout icon="💰">
+              <strong>The Structural Deficit:</strong> The 2026 audit reveals Berkeley faces a <strong>$32-33M General Fund structural deficit</strong> for FY 2027-28. The City has been using one-time fixes: redirecting $4.7M from workers' comp, pulling $3M from the pension trust, and transferring surpluses between funds. The audit calls these strategies unsustainable and recommends the City adopt policies requiring recurring revenues to match recurring expenditures. A 0.5% sales tax increase is being considered for the 2026 ballot (~$9-10M/year).
+            </Callout>
+
+            <Callout icon="👥">
+              <strong>Personnel Costs:</strong> The 2026 audit adds new detail on workforce spending. Total personnel expenditure grew from $308M to $371M (FY16→FY25) while budgeted FTEs jumped 30% (1,336→1,747). Salaries represent ~⅔ of the General Fund. Pension costs alone are projected to rise from $76M to $108M by FY 2034.
+            </Callout>
+          </div>
+        )}
+
+        {tab === "liabilities" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <Card>
+              <SectionTitle sub="Net pension liability peaked in FY21, dipped in FY22 (investment gains), then climbed back">
+                Net Pension Liability Trend (2025 dollars)
+              </SectionTitle>
+              <ResponsiveContainer width="100%" height={220}>
+                <ComposedChart data={pensionData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={C.ice} />
+                  <XAxis dataKey="fy" tick={{ fontSize: 10, fill: C.fog }} />
+                  <YAxis tick={{ fontSize: 10, fill: C.fog }} tickFormatter={v => `$${v}M`} domain={[400, 800]} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="v" name="Net Pension" fill={C.navy} fillOpacity={0.15} stroke={C.navy} strokeWidth={2} />
+                  <ReferenceLine y={21.7} stroke={C.teal} strokeDasharray="6 4" label={{ value: "Homeless ($21.7M/yr)", fontSize: 9, fill: C.teal, position: "insideTopRight" }} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </Card>
+
+            <Card>
+              <SectionTitle sub="One bright spot: retiree healthcare liability dropped by more than $100M">
+                Retiree Healthcare Liability (2025 dollars)
+              </SectionTitle>
+              <ResponsiveContainer width="100%" height={180}>
+                <ComposedChart data={opebData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={C.ice} />
+                  <XAxis dataKey="fy" tick={{ fontSize: 10, fill: C.fog }} />
+                  <YAxis tick={{ fontSize: 10, fill: C.fog }} tickFormatter={v => `$${v}M`} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="v" name="Retiree Healthcare" fill={C.green} fillOpacity={0.15} stroke={C.green} strokeWidth={2} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </Card>
+
+            <Card>
+              <SectionTitle>Unfunded Capital & Deferred Maintenance</SectionTitle>
+              <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: 40, padding: "16px 0" }}>
+                {capitalData.map((d, i) => {
+                  const h = (d.v / 1800) * 180;
+                  return (
+                    <div key={i} style={{ textAlign: "center" }}>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: C.warn, fontFamily: "'Libre Baskerville',Georgia,serif", marginBottom: 4 }}>
+                        {d.v >= 1000 ? `$${(d.v/1000).toFixed(1)}B` : `$${d.v}M`}
+                      </div>
+                      <div style={{ width: 50, height: h, background: `linear-gradient(180deg, ${C.warn}, ${C.navy})`, borderRadius: "4px 4px 0 0", opacity: 0.8 }} />
+                      <div style={{ fontSize: 10, color: C.steel, marginTop: 6, fontWeight: 600 }}>{d.fy}</div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ textAlign: "center", fontSize: 11, color: C.warn, fontWeight: 600 }}>
+                Grew 3x in 7 years. The 2026 audit says the City "lacks advanced planning to finance its capital plan."
+              </div>
+            </Card>
+
+            <Callout icon="🏗️">
+              <strong>New in 2026:</strong> The audit recommends Berkeley extend its Capital Improvement Program beyond 5 years and develop a capital financing plan with future bond proposals. City management is considering a <strong>$300M bond measure</strong> for the 2026 ballot. The Section 115 pension trust balance reached $29.5M but the City met its contribution goal only 2 of 7 years.
+            </Callout>
+          </div>
+        )}
+
+        {tab === "homeless" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <Card>
+              <SectionTitle>Where Homeless Spending Fits in Both Audits</SectionTitle>
+              <div style={{ fontSize: 12.5, lineHeight: 1.65, color: C.steel }}>
+                <p style={{ margin: "0 0 8px" }}>Neither audit specifically breaks out homeless program spending, but the HSPE agenda package shows <strong>$21.7M across 33 programs</strong>. This spending falls primarily within <strong>Health & Welfare</strong> (the fastest-growing category at +107%) and <strong>Community Development & Housing</strong> (+119%).</p>
+                <p style={{ margin: 0 }}>These are the two categories driving the structural deficit. Together they grew from $49.8M to $106.1M — an increase of $56.3M — which alone exceeds the $32-33M projected deficit.</p>
+              </div>
+            </Card>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+              <Card>
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 10, color: C.fog, fontWeight: 600, marginBottom: 4 }}>Share of Total Govt Expenses</div>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: C.navy, fontFamily: "'Libre Baskerville',Georgia,serif" }}>5.0%</div>
+                  <div style={{ fontSize: 10, color: C.fog }}>$21.7M of $435M</div>
+                </div>
+              </Card>
+              <Card>
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 10, color: C.fog, fontWeight: 600, marginBottom: 4 }}>Share of Health & Welfare</div>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: C.gold, fontFamily: "'Libre Baskerville',Georgia,serif" }}>~40%</div>
+                  <div style={{ fontSize: 10, color: C.fog }}>$21.7M of $54.8M</div>
+                </div>
+              </Card>
+              <Card>
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 10, color: C.fog, fontWeight: 600, marginBottom: 4 }}>% of Structural Deficit</div>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: C.warn, fontFamily: "'Libre Baskerville',Georgia,serif" }}>~66%</div>
+                  <div style={{ fontSize: 10, color: C.fog }}>$21.7M vs $32M deficit</div>
+                </div>
+              </Card>
+            </div>
+
+            <Card>
+              <SectionTitle>Then vs. Now: Homeless Spending in Context</SectionTitle>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div style={{ padding: 12, background: "#fafaf7", borderRadius: 5, borderLeft: `3px solid ${C.teal}` }}>
+                  <div style={{ fontSize: 10, color: C.fog, fontWeight: 600, marginBottom: 6 }}>2022 AUDIT ERA (FY 2021)</div>
+                  <div style={{ fontSize: 12, color: C.steel, lineHeight: 1.5 }}>
+                    H&W total: <strong>$41.6M</strong><br />
+                    Comm Dev: <strong>$32.8M</strong><br />
+                    Combined: <strong>$74.4M</strong><br />
+                    Unfunded capital: $1.2B<br />
+                    Net pension: $658M<br />
+                    Structural deficit: <em>Not identified</em>
+                  </div>
+                </div>
+                <div style={{ padding: 12, background: "#fafaf7", borderRadius: 5, borderLeft: `3px solid ${C.warn}` }}>
+                  <div style={{ fontSize: 10, color: C.fog, fontWeight: 600, marginBottom: 6 }}>2026 AUDIT ERA (FY 2025)</div>
+                  <div style={{ fontSize: 12, color: C.steel, lineHeight: 1.5 }}>
+                    H&W total: <strong>$54.8M</strong> (+32%)<br />
+                    Comm Dev: <strong>$51.3M</strong> (+56%)<br />
+                    Combined: <strong>$106.1M</strong> (+43%)<br />
+                    Unfunded capital: $1.8B (+50%)<br />
+                    Net pension: $695M (+6%)<br />
+                    Structural deficit: <strong>$32-33M</strong>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <Callout icon="🔍">
+              <strong>The Core Tension:</strong> Homeless services ($21.7M/year) represent roughly two-thirds the size of the structural deficit ($32M). They sit inside the two fastest-growing expense categories. The 2026 audit doesn't call out homeless spending specifically, but it documents the squeeze: recurring expenses are outpacing recurring revenues, and one-time fixes are running out. Any path to closing the deficit will inevitably involve scrutiny of these programs alongside pension costs ($76M→$108M projected), public safety ($162M), and infrastructure ($1.8B backlog).
+            </Callout>
+          </div>
+        )}
+
+        <div style={{ marginTop: 20, padding: "12px 0", borderTop: `1px solid ${C.ice}`, fontSize: 10, color: C.fog, lineHeight: 1.5 }}>
+          <strong>Sources:</strong> (1) Jenny Wong, "Berkeley's Financial Condition (FY 2012–FY 2021): Pension Liabilities and Infrastructure Need Attention," May 2022. (2) Jenny Wong, "Berkeley's Financial Condition (FY 2016–FY 2025): Structural Deficit Poses Risk to Financial Sustainability," April 8, 2026. (3) HSPE Full Agenda Package, May 4, 2026. All dollar figures from the 2026 audit are inflation-adjusted to 2025 dollars; 2022 audit figures were in 2021 dollars.
         </div>
       </div>
     </div>
   );
 }
 
-ReactDOM.render(React.createElement(App), document.getElementById("root"));
-</script></body></html>
+ReactDOM.render(React.createElement(AuditComparison), document.getElementById('root'));
+</script>
+</body>
+</html>
