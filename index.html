@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Berkeley Financial Condition & Homeless Spending Comparison</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.12.7/Recharts.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Source Sans 3',sans-serif; background:#f4f1eb; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+const { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, ComposedChart, Area, ReferenceLine } = Recharts;
+
+const COLORS = {
+  navy: "#1a2744",
+  slate: "#2d3a4a",
+  steel: "#4a5568",
+  fog: "#8896a7",
+  ice: "#c5d0dc",
+  cream: "#f4f1eb",
+  sand: "#e8e2d6",
+  warn: "#c4553a",
+  warnLight: "#e8927d",
+  gold: "#d4a843",
+  goldLight: "#e8cc7a",
+  teal: "#2a7d6e",
+  tealLight: "#5aab9a",
+  blue: "#3a6ea5",
+  blueLight: "#6a9ec5",
+};
+
+// Data from Jenny Wong's audit (inflation-adjusted to 2021 dollars, in millions)
+const revenueExpenseData = [
+  { fy: "FY12", rev: 285.6, exp: 284.2, hw: 25.2 },
+  { fy: "FY13", rev: 286.7, exp: 274.8, hw: 27.1 },
+  { fy: "FY14", rev: 297.6, exp: 273.2, hw: 29.0 },
+  { fy: "FY15", rev: 281.3, exp: 284.8, hw: 30.5 },
+  { fy: "FY16", rev: 305.7, exp: 284.0, hw: 32.0 },
+  { fy: "FY17", rev: 317.7, exp: 272.5, hw: 33.5 },
+  { fy: "FY18", rev: 319.6, exp: 317.7, hw: 35.0 },
+  { fy: "FY19", rev: 353.5, exp: 337.1, hw: 37.8 },
+  { fy: "FY20", rev: 348.5, exp: 362.3, hw: 39.5 },
+  { fy: "FY21", rev: 358.0, exp: 341.4, hw: 41.6 },
+  { fy: "FY25*", rev: null, exp: null, hw: 50.0 },
+];
+
+// Expense by function data
+const expenseByFunction = [
+  { name: "Public Safety", fy12: 121.0, fy21: 149.2, pct: "44%" },
+  { name: "Culture & Rec", fy12: 45.3, fy21: 52.0, pct: "15%" },
+  { name: "Health & Welfare", fy12: 25.2, fy21: 41.6, pct: "12%" },
+  { name: "General Govt", fy12: 38.6, fy21: 38.0, pct: "11%" },
+  { name: "Community Dev", fy12: 25.1, fy21: 32.8, pct: "10%" },
+  { name: "Highways/Streets", fy12: 19.0, fy21: 16.7, pct: "5%" },
+];
+
+// Unfunded liabilities
+const unfundedData = [
+  { name: "Capital & Deferred\nMaintenance", value: 1200 },
+  { name: "Pension\nLiabilities", value: 658 },
+  { name: "OPEB\nLiabilities", value: 115 },
+  { name: "Homeless Programs\n(Annual)", value: 21.7 },
+];
+
+// Homeless programs by type
+const homelessByType = [
+  { name: "Permanent Supportive Housing", budget: 7.72, color: COLORS.teal },
+  { name: "Emergency Shelter", budget: 2.93, color: COLORS.warn },
+  { name: "Interim Shelter (Motel)", budget: 4.24, color: COLORS.gold },
+  { name: "Daytime Drop-In", budget: 0.53, color: COLORS.blue },
+  { name: "Coordinated Entry / Outreach", budget: 2.37, color: COLORS.fog },
+  { name: "Transitional Housing", budget: 0.31, color: COLORS.tealLight },
+  { name: "Other Services", budget: 3.51, color: COLORS.ice },
+];
+
+// Pension + OPEB trend
+const pensionTrend = [
+  { fy: "FY12", pension: 506.9, opeb: 60.4 },
+  { fy: "FY14", pension: 628.4, opeb: 95.5 },
+  { fy: "FY16", pension: 558.0, opeb: 127.8 },
+  { fy: "FY18", pension: 642.8, opeb: 100.7 },
+  { fy: "FY20", pension: 643.5, opeb: 143.7 },
+  { fy: "FY21", pension: 657.9, opeb: 115.1 },
+];
+
+const PIE_COLORS = homelessByType.map(h => h.color);
+
+const fmt = (v) => `$${v}M`;
+const fmtB = (v) => v >= 1000 ? `$${(v/1000).toFixed(1)}B` : `$${v}M`;
+
+const SectionTitle = ({ children, sub }) => (
+  <div style={{ marginBottom: 16 }}>
+    <h3 style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 17, fontWeight: 700, color: COLORS.navy, margin: 0, letterSpacing: "-0.3px" }}>{children}</h3>
+    {sub && <p style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: 12.5, color: COLORS.fog, margin: "3px 0 0", lineHeight: 1.4 }}>{sub}</p>}
+  </div>
+);
+
+const Callout = ({ value, label, color = COLORS.warn }) => (
+  <div style={{ textAlign: "center", padding: "14px 10px" }}>
+    <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 26, fontWeight: 700, color, letterSpacing: "-1px" }}>{value}</div>
+    <div style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: 11.5, color: COLORS.steel, marginTop: 4, lineHeight: 1.3 }}>{label}</div>
+  </div>
+);
+
+const Card = ({ children, style }) => (
+  <div style={{
+    background: "#fff",
+    borderRadius: 6,
+    border: `1px solid ${COLORS.ice}`,
+    padding: 20,
+    ...style,
+  }}>
+    {children}
+  </div>
+);
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (!active || !payload) return null;
+  return (
+    <div style={{ background: COLORS.navy, padding: "8px 12px", borderRadius: 4, border: "none" }}>
+      <div style={{ color: COLORS.ice, fontSize: 11, marginBottom: 4, fontFamily: "'Source Sans 3', sans-serif" }}>{label}</div>
+      {payload.map((p, i) => (
+        <div key={i} style={{ color: "#fff", fontSize: 12, fontFamily: "'Source Sans 3', sans-serif" }}>
+          <span style={{ color: p.color || p.fill, marginRight: 6 }}>●</span>
+          {p.name}: {typeof p.value === "number" ? `$${p.value.toFixed(1)}M` : p.value}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+function BerkeleyAuditComparison() {
+  const [activeTab, setActiveTab] = useState("overview");
+
+  const tabs = [
+    { id: "overview", label: "Overview" },
+    { id: "spending", label: "Spending Trends" },
+    { id: "competing", label: "Competing Priorities" },
+    { id: "homeless", label: "Homeless Programs" },
+  ];
+
+  return (
+    <div style={{ fontFamily: "'Source Sans 3', sans-serif", background: COLORS.cream, minHeight: "100vh", padding: 0 }}>
+      <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet" />
+
+      {/* Header */}
+      <div style={{ background: COLORS.navy, color: "#fff", padding: "28px 28px 20px" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 6 }}>
+          <div style={{ width: 4, height: 44, background: COLORS.gold, borderRadius: 2, flexShrink: 0, marginTop: 2 }} />
+          <div>
+            <h1 style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 22, fontWeight: 700, margin: 0, lineHeight: 1.2, letterSpacing: "-0.5px" }}>
+              Berkeley Financial Condition & Homeless Spending
+            </h1>
+            <p style={{ fontSize: 13, color: COLORS.ice, margin: "6px 0 0", lineHeight: 1.4 }}>
+              Overlay of FY25 homeless program budgets onto City Auditor Jenny Wong's FY 2012–2021 financial condition analysis
+            </p>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 6, marginTop: 16 }}>
+          {tabs.map(t => (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              style={{
+                padding: "7px 14px",
+                borderRadius: 4,
+                border: "none",
+                fontSize: 12.5,
+                fontWeight: activeTab === t.id ? 700 : 400,
+                fontFamily: "'Source Sans 3', sans-serif",
+                background: activeTab === t.id ? COLORS.gold : "rgba(255,255,255,0.08)",
+                color: activeTab === t.id ? COLORS.navy : COLORS.ice,
+                cursor: "pointer",
+                transition: "all 0.15s",
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ padding: "20px 24px 40px", maxWidth: 900, margin: "0 auto" }}>
+
+        {activeTab === "overview" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {/* Key stats row */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+              <Card><Callout value="$21.7M" label="Homeless Programs (Annual)" color={COLORS.teal} /></Card>
+              <Card><Callout value="65%" label="Health & Welfare Growth FY12→21" color={COLORS.warn} /></Card>
+              <Card><Callout value="$1.2B" label="Unfunded Capital Needs" color={COLORS.gold} /></Card>
+              <Card><Callout value="$773M" label="Pension + OPEB Liabilities" color={COLORS.navy} /></Card>
+            </div>
+
+            {/* Summary text */}
+            <Card>
+              <SectionTitle sub="Source: City Auditor Report (May 2022) + HSPE Agenda Package (May 2026)">
+                Context: Two Fiscal Pictures of Berkeley
+              </SectionTitle>
+              <div style={{ fontSize: 13.5, lineHeight: 1.65, color: COLORS.steel }}>
+                <p style={{ margin: "0 0 10px" }}>
+                  Jenny Wong's 2022 audit found Berkeley's <strong>near-term finances strong</strong> — revenues grew 25% (inflation-adjusted) and outpaced expenses in 8 of 10 years. But long-term risks loomed: pension liabilities hit $658M, OPEB grew 91%, and unfunded infrastructure needs reached $1.2 billion.
+                </p>
+                <p style={{ margin: "0 0 10px" }}>
+                  <strong>Health & Welfare</strong> spending — the category that includes homeless services — saw the second-largest real growth of any function at 65%, rising from $25.2M to $41.6M. Today, the 33 homeless programs tracked in the HSPE agenda total <strong>$21.7M annually</strong>, representing a significant and growing share of that category.
+                </p>
+                <p style={{ margin: 0 }}>
+                  This dashboard overlays current homeless spending onto the audit's trend lines to show where these costs sit in Berkeley's broader fiscal landscape — and the competing priorities they face.
+                </p>
+              </div>
+            </Card>
+
+            {/* Rev vs Exp chart */}
+            <Card>
+              <SectionTitle sub="Inflation-adjusted (2021 dollars). FY25 Health & Welfare figure is estimated.">
+                Revenue vs. Expenses with Health & Welfare Highlighted
+              </SectionTitle>
+              <ResponsiveContainer width="100%" height={280}>
+                <ComposedChart data={revenueExpenseData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={COLORS.ice} />
+                  <XAxis dataKey="fy" tick={{ fontSize: 11, fill: COLORS.fog }} />
+                  <YAxis tick={{ fontSize: 11, fill: COLORS.fog }} tickFormatter={v => `$${v}M`} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                  <Line type="monotone" dataKey="rev" name="Total Revenue" stroke={COLORS.teal} strokeWidth={2.5} dot={{ r: 3 }} connectNulls={false} />
+                  <Line type="monotone" dataKey="exp" name="Total Expenses" stroke={COLORS.warn} strokeWidth={2.5} dot={{ r: 3 }} connectNulls={false} />
+                  <Bar dataKey="hw" name="Health & Welfare" fill={COLORS.gold} opacity={0.7} barSize={20} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === "spending" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <Card>
+              <SectionTitle sub="Inflation-adjusted, in millions (2021 dollars). Health & Welfare grew 65% — second only to Public Safety.">
+                Expenses by Function: FY 2012 vs. FY 2021
+              </SectionTitle>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={expenseByFunction} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={COLORS.ice} horizontal={false} />
+                  <XAxis type="number" tick={{ fontSize: 11, fill: COLORS.fog }} tickFormatter={v => `$${v}M`} />
+                  <YAxis dataKey="name" type="category" width={110} tick={{ fontSize: 11, fill: COLORS.steel }} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                  <Bar dataKey="fy12" name="FY 2012" fill={COLORS.ice} barSize={14} radius={[0, 3, 3, 0]} />
+                  <Bar dataKey="fy21" name="FY 2021" fill={COLORS.navy} barSize={14} radius={[0, 3, 3, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </Card>
+
+            <Card>
+              <SectionTitle sub="Public Safety dominates at 44%, but Health & Welfare's growth rate outpaces all others except Public Safety.">
+                Growth Rate Comparison by Function
+              </SectionTitle>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+                {[
+                  { fn: "Public Safety", from: 121.0, to: 149.2, color: COLORS.warn },
+                  { fn: "Health & Welfare", from: 25.2, to: 41.6, color: COLORS.gold },
+                  { fn: "Culture & Rec", from: 45.3, to: 52.0, color: COLORS.teal },
+                  { fn: "Community Dev", from: 25.1, to: 32.8, color: COLORS.blue },
+                  { fn: "General Govt", from: 38.6, to: 38.0, color: COLORS.fog },
+                  { fn: "Highways/Streets", from: 19.0, to: 16.7, color: COLORS.steel },
+                ].map(item => {
+                  const growth = ((item.to - item.from) / item.from * 100).toFixed(0);
+                  const positive = Number(growth) >= 0;
+                  return (
+                    <div key={item.fn} style={{ padding: "12px 14px", borderRadius: 5, border: `1px solid ${COLORS.ice}`, background: "#fafaf7" }}>
+                      <div style={{ fontSize: 11, color: COLORS.fog, marginBottom: 4, fontWeight: 600 }}>{item.fn}</div>
+                      <div style={{ fontSize: 24, fontWeight: 700, color: positive ? item.color : COLORS.fog, fontFamily: "'Libre Baskerville', Georgia, serif", letterSpacing: "-1px" }}>
+                        {positive ? "+" : ""}{growth}%
+                      </div>
+                      <div style={{ fontSize: 10.5, color: COLORS.fog, marginTop: 2 }}>${item.from}M → ${item.to}M</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+
+            <Card style={{ background: COLORS.sand, borderColor: COLORS.gold }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                <div style={{ fontSize: 22, lineHeight: 1 }}>⚠</div>
+                <div style={{ fontSize: 13, lineHeight: 1.6, color: COLORS.slate }}>
+                  <strong>Key Insight:</strong> Health & Welfare grew 65% in real terms over the decade — and homeless services are a major driver. At $21.7M, today's homeless programs alone approach the <em>entire</em> FY 2012 Health & Welfare budget of $25.2M. This spending category is on a trajectory that outpaces revenue growth (25% over the same period).
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === "competing" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <Card>
+              <SectionTitle sub="Log scale. Annual homeless program spending compared to cumulative unfunded obligations.">
+                Competing Fiscal Pressures (in millions)
+              </SectionTitle>
+              <div style={{ display: "flex", gap: 0, alignItems: "flex-end", justifyContent: "center", padding: "20px 0 10px" }}>
+                {unfundedData.map((d, i) => {
+                  const maxH = 220;
+                  const logMax = Math.log(1200);
+                  const h = Math.max(20, (Math.log(Math.max(d.value, 1)) / logMax) * maxH);
+                  const colors = [COLORS.warn, COLORS.navy, COLORS.steel, COLORS.teal];
+                  return (
+                    <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 160 }}>
+                      <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 18, fontWeight: 700, color: colors[i], marginBottom: 6, letterSpacing: "-0.5px" }}>
+                        {fmtB(d.value)}
+                      </div>
+                      <div style={{ width: 70, height: h, background: colors[i], borderRadius: "4px 4px 0 0", transition: "height 0.5s", opacity: 0.85 }} />
+                      <div style={{ fontSize: 11, color: COLORS.steel, marginTop: 8, textAlign: "center", lineHeight: 1.3, whiteSpace: "pre-line", fontWeight: 600 }}>
+                        {d.name}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ textAlign: "center", fontSize: 10.5, color: COLORS.fog, marginTop: 8 }}>
+                Bar heights are log-scaled to show relative magnitude
+              </div>
+            </Card>
+
+            <Card>
+              <SectionTitle sub="Inflation-adjusted (2021 dollars). Combined pension and OPEB liabilities grew 36% over the decade.">
+                Pension & OPEB Liability Trend
+              </SectionTitle>
+              <ResponsiveContainer width="100%" height={240}>
+                <ComposedChart data={pensionTrend} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={COLORS.ice} />
+                  <XAxis dataKey="fy" tick={{ fontSize: 11, fill: COLORS.fog }} />
+                  <YAxis tick={{ fontSize: 11, fill: COLORS.fog }} tickFormatter={v => `$${v}M`} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                  <Area type="monotone" dataKey="pension" name="Net Pension" fill={COLORS.navy} fillOpacity={0.15} stroke={COLORS.navy} strokeWidth={2} />
+                  <Area type="monotone" dataKey="opeb" name="Net OPEB" fill={COLORS.warn} fillOpacity={0.15} stroke={COLORS.warn} strokeWidth={2} />
+                  <ReferenceLine y={21.7} stroke={COLORS.teal} strokeDasharray="6 4" strokeWidth={1.5} label={{ value: "Annual Homeless Spending ($21.7M)", position: "insideTopRight", fontSize: 10, fill: COLORS.teal }} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </Card>
+
+            <Card style={{ background: COLORS.sand, borderColor: COLORS.gold }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                <div style={{ fontSize: 22, lineHeight: 1 }}>📊</div>
+                <div style={{ fontSize: 13, lineHeight: 1.6, color: COLORS.slate }}>
+                  <strong>The Squeeze:</strong> Berkeley faces $1.97 billion in combined unfunded obligations (capital + pension + OPEB) while spending $21.7M/year on homeless programs that serve ~4,400+ individuals. The audit found the City's pension funded ratio at 66% — rated "high risk" by the State Auditor. Every dollar committed to growing homeless services competes with these legacy obligations. Jenny Wong recommended the City implement funding plans for both pension contributions and infrastructure — neither of which has been fully resolved.
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === "homeless" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <Card>
+                <SectionTitle sub="33 programs across 13 organizations">
+                  Homeless Program Spending by Type
+                </SectionTitle>
+                <ResponsiveContainer width="100%" height={240}>
+                  <PieChart>
+                    <Pie data={homelessByType} dataKey="budget" nameKey="name" cx="50%" cy="50%" outerRadius={90} innerRadius={45} paddingAngle={2} label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`} labelLine={{ stroke: COLORS.fog, strokeWidth: 0.5 }} >
+                      {homelessByType.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} />)}
+                    </Pie>
+                    <Tooltip formatter={(v) => `$${Number(v).toFixed(2)}M`} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 14px", justifyContent: "center" }}>
+                  {homelessByType.map((h, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10.5, color: COLORS.steel }}>
+                      <div style={{ width: 8, height: 8, borderRadius: 2, background: PIE_COLORS[i], flexShrink: 0 }} />
+                      {h.name}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              <Card>
+                <SectionTitle sub="Largest programs by annual budget">
+                  Top Programs
+                </SectionTitle>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {[
+                    { name: "Supportive Housing Collab.", org: "City of Berkeley", budget: 6.60 },
+                    { name: "STAIR Pathways Center", org: "BACS", budget: 2.43 },
+                    { name: "North County HRC", org: "BACS", budget: 2.33 },
+                    { name: "Horizon Community Village", org: "Dorothy Day", budget: 1.83 },
+                    { name: "Campus Motel (Super 8)", org: "Insight Housing", budget: 1.46 },
+                    { name: "Step Up Housing", org: "BOSS", budget: 1.01 },
+                    { name: "Beyond the Horizon", org: "Dorothy Day", budget: 0.95 },
+                    { name: "Trust Clinic", org: "LifeLong", budget: 0.88 },
+                  ].map((p, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ fontSize: 10, color: COLORS.fog, width: 14, textAlign: "right" }}>{i + 1}</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ height: 16, borderRadius: 3, background: `linear-gradient(90deg, ${COLORS.teal}22, ${COLORS.teal}${Math.round(p.budget / 6.6 * 80 + 15).toString(16)})`, width: `${Math.max(p.budget / 6.6 * 100, 12)}%`, display: "flex", alignItems: "center", paddingLeft: 6 }}>
+                          <span style={{ fontSize: 10, color: COLORS.navy, fontWeight: 600, whiteSpace: "nowrap" }}>{p.name}</span>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 11, color: COLORS.steel, fontWeight: 600, width: 50, textAlign: "right" }}>${p.budget.toFixed(2)}M</div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+
+            <Card>
+              <SectionTitle>Homeless Spending in Fiscal Context</SectionTitle>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+                <div style={{ textAlign: "center", padding: "16px 10px", background: "#fafaf7", borderRadius: 6 }}>
+                  <div style={{ fontSize: 11, color: COLORS.fog, marginBottom: 6, fontWeight: 600 }}>Share of Total Govt Expenses</div>
+                  <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 30, fontWeight: 700, color: COLORS.navy, letterSpacing: "-1px" }}>6.4%</div>
+                  <div style={{ fontSize: 10.5, color: COLORS.fog, marginTop: 4 }}>$21.7M of ~$341M</div>
+                </div>
+                <div style={{ textAlign: "center", padding: "16px 10px", background: "#fafaf7", borderRadius: 6 }}>
+                  <div style={{ fontSize: 11, color: COLORS.fog, marginBottom: 6, fontWeight: 600 }}>Share of Health & Welfare</div>
+                  <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 30, fontWeight: 700, color: COLORS.gold, letterSpacing: "-1px" }}>~52%</div>
+                  <div style={{ fontSize: 10.5, color: COLORS.fog, marginTop: 4 }}>$21.7M of ~$41.6M</div>
+                </div>
+                <div style={{ textAlign: "center", padding: "16px 10px", background: "#fafaf7", borderRadius: 6 }}>
+                  <div style={{ fontSize: 11, color: COLORS.fog, marginBottom: 6, fontWeight: 600 }}>Cost per Berkeley Resident</div>
+                  <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 30, fontWeight: 700, color: COLORS.teal, letterSpacing: "-1px" }}>$186</div>
+                  <div style={{ fontSize: 10.5, color: COLORS.fog, marginTop: 4 }}>~116,700 residents</div>
+                </div>
+              </div>
+            </Card>
+
+            <Card style={{ background: COLORS.sand, borderColor: COLORS.gold }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                <div style={{ fontSize: 22, lineHeight: 1 }}>🔍</div>
+                <div style={{ fontSize: 13, lineHeight: 1.6, color: COLORS.slate }}>
+                  <strong>Then vs. Now:</strong> In FY 2012, Berkeley spent $25.2M total on Health & Welfare. Today, homeless programs <em>alone</em> total $21.7M — nearly matching the entire category's budget from a decade ago. The Supportive Housing Collaborative ($6.6M) is the single largest program, followed by BACS' STAIR Pathways Center ($2.4M) and North County HRC ($2.3M). These three programs account for over half of all homeless spending.
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div style={{ marginTop: 24, padding: "14px 0", borderTop: `1px solid ${COLORS.ice}`, fontSize: 10.5, color: COLORS.fog, lineHeight: 1.5 }}>
+          <strong>Sources:</strong> City Auditor Jenny Wong, "Berkeley's Financial Condition (FY 2012–FY 2021): Pension Liabilities and Infrastructure Need Attention," May 2022. Homeless program data from HSPE Full Agenda Package, May 4, 2026. Financial figures from the audit are inflation-adjusted to 2021 dollars. FY25 Health & Welfare figure is estimated based on trend extrapolation. Some homeless program subtotals are approximated from program-level data.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(React.createElement(BerkeleyAuditComparison), document.getElementById('root'));
+</script>
+</body>
+</html>
