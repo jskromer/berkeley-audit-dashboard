@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>BeTH · The Streets Plan That Doesn't Reach 70</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#15130f;--ink2:#2b2722;--paper:#f4efe6;--paper2:#ece5d8;--rule:#d8cdb8;--accent:#9c2b21;--accent2:#b8742a;--gold:#c8a44d;--good:#3f6f4a;--muted:#7a7164;--steel:#4a6a86;}
+*{box-sizing:border-box}
+body{margin:0;background:#0e0c0a;color:var(--ink);font-family:'Source Serif 4',Georgia,serif;}
+.wrap{max-width:1200px;margin:0 auto;background:var(--paper);min-height:100vh;box-shadow:0 0 80px rgba(0,0,0,.5)}
+.masthead{background:var(--ink);color:var(--paper);padding:34px 46px 28px;border-bottom:5px double var(--gold)}
+.kicker{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin:0 0 10px}
+.masthead h1{font-family:'Playfair Display',serif;font-weight:900;font-size:48px;line-height:.97;margin:0;letter-spacing:-.01em;color:var(--paper)}
+.masthead h1 em{font-style:italic;color:var(--accent2)}
+.dek{font-size:16px;color:#cbbfa9;margin:14px 0 0;max-width:860px;line-height:1.55}
+.byline{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);margin-top:16px;text-transform:uppercase;line-height:1.6}
+.hubnav{background:var(--ink2);padding:10px 46px;display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid #000}
+.hubnav a{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#bdb2a0;text-decoration:none;padding:5px 14px 5px 0;margin-right:14px;border-right:1px solid #4a443b}
+.hubnav a:last-child{border-right:none}
+.hubnav a:hover{color:var(--gold)}
+.hubnav a.here{color:var(--gold);font-weight:700}
+.section{padding:30px 46px;border-bottom:1px solid var(--rule)}
+.section h2{font-family:'Playfair Display',serif;font-weight:700;font-size:13px;letter-spacing:.26em;text-transform:uppercase;color:var(--accent);margin:0 0 18px;display:flex;align-items:center;gap:12px}
+.section h2:after{content:"";flex:1;height:1px;background:var(--rule)}
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.metric{background:var(--paper);padding:16px 16px 14px}
+.metric .v{font-family:'Playfair Display',serif;font-weight:900;font-size:27px;line-height:1;color:var(--ink)}
+.metric .v small{font-size:13px;font-weight:700;color:var(--muted)}
+.metric .l{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:8px;line-height:1.45}
+.metric.flag .v{color:var(--accent)}
+.callout{background:var(--ink2);color:var(--paper);padding:24px 28px;border-left:5px solid var(--accent)}
+.callout .src{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:9px}
+.callout p{margin:0;font-size:16px;line-height:1.6;color:#ece3d0}
+.callout p+p{margin-top:12px}
+.callout b{color:#fff}
+.realloc{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);margin-bottom:18px}
+.rc{background:var(--paper);padding:15px 16px}
+.rc .n{font-family:'Playfair Display',serif;font-weight:900;font-size:24px;color:var(--accent)}
+.rc .t{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:7px;line-height:1.5}
+.chartwrap{background:var(--paper2);border:1px solid var(--rule);padding:18px 10px 10px}
+.chartwrap svg{width:100%;height:auto;display:block}
+.chartnote{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.05em;color:var(--muted);line-height:1.7;padding:6px 12px 4px;text-transform:uppercase}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 9px;border-bottom:2px solid var(--ink)}
+thead th.r{text-align:right}
+tbody td{padding:9px 9px;border-bottom:1px solid var(--rule);vertical-align:top}
+tbody td.r{text-align:right;font-family:'JetBrains Mono',monospace;font-size:11.5px;white-space:nowrap}
+tbody tr:hover{background:var(--paper2)}
+tbody tr.tot td{border-top:2px solid var(--ink);border-bottom:none;font-weight:600}
+.pname{font-weight:600;color:var(--ink)}
+.cnote{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+.neg{color:var(--accent)}
+.pos{color:var(--good)}
+.gaps{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.gap{background:var(--paper);padding:15px 17px}
+.gap .t{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px}
+.gap p{margin:0;font-size:13px;line-height:1.5;color:var(--ink2)}
+.removed{font-size:13.5px;color:var(--ink2);line-height:1.7}
+.removed>div{margin-bottom:9px}
+.removed .x{color:var(--accent);font-family:'JetBrains Mono';font-weight:700;font-size:11px;margin-right:8px}
+.removed .dim{color:#9a917f}
+.conf{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:3px;font-weight:700;color:#fff;white-space:nowrap;margin-left:6px}
+.conf.hi{background:var(--good)}.conf.mod{background:var(--accent2)}.conf.unk{background:#8a7d63}
+.body p{font-size:14.5px;line-height:1.68;color:var(--ink2);margin:0 0 14px;max-width:900px}
+.body p:last-child{margin-bottom:0}
+.foot{padding:22px 46px 40px;background:var(--ink);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.7;letter-spacing:.03em}
+.foot a{color:#9a8f78}
+.note{font-size:12px;color:var(--muted);font-style:italic;margin-top:14px;line-height:1.5}
+@media(max-width:860px){.metrics,.realloc{grid-template-columns:repeat(2,1fr)}.gaps{grid-template-columns:1fr}.masthead h1{font-size:31px}.section,.masthead,.hubnav,.foot{padding-left:20px;padding-right:20px}}
+</style></head>
+<body><div class="wrap">
+
+<div class="masthead">
+<p class="kicker">Berkeley Transparency Hub · Capital Accountability</p>
+<h1>The Streets Plan That&nbsp;<em>Doesn't</em>&nbsp;Reach 70</h1>
+<p class="dek">In November 2024 Berkeley voters approved Measure FF — a ~$267M parcel tax whose stated purpose is a citywide pavement score of 70 by December 31, 2036. On July 7, 2026, Council adopted the first five-year plan built on that money. Buried on page 12 of the staff report is the city's own model: the funded program lands at <b>62</b>, not 70, and is short roughly <b>$8 million a year</b>. The February briefing that introduced this plan to the public contained no projection at all.</p>
+<p class="byline">Primary source: Item 10, Action Calendar, July 7 2026 — Five-Year Street Rehabilitation and Measure FF Plans FY2027–2031 (70 pp.) · earlier draft: FITES informational briefing, Feb 4 2026 · commission action: Transportation &amp; Infrastructure Commission, May 21 2026 · Compiled by BeTH, July 27 2026</p>
+</div>
+
+<div class="hubnav">
+<a href="index.html">Measure T1 Tracker</a>
+<a href="carryover.html">Carryover Tracker</a>
+<a href="mayors-budget.html">Mayor's Budget Origins</a>
+<a href="measure-l-projects.html">Measure L Projects</a>
+<a class="here" href="paving-plan.html">Paving &amp; Measure FF</a>
+</div>
+
+<div class="section"><h2>The Network</h2>
+<div class="metrics">
+<div class="metric"><div class="v">213<small> mi</small></div><div class="l">Centerline miles maintained · replacement value over $1.2B</div></div>
+<div class="metric flag"><div class="v">57</div><div class="l">Citywide PCI, 2025 assessment · city classifies this "at risk"</div></div>
+<div class="metric flag"><div class="v">$330M</div><div class="l">Deferred maintenance backlog as of 2025 · rising past $406M by 2029</div></div>
+<div class="metric"><div class="v">70</div><div class="l">PCI required by Dec 31 2036 · BMC 7.11.010(K), Measure FF</div></div>
+<div class="metric flag"><div class="v">62</div><div class="l">PCI the funded program actually reaches, by 2038 · city's own model</div></div>
+</div>
+<p class="note">PCI is the Pavement Condition Index, a 0–100 surface-condition score. The city projects 59 after the FY2026 paving project completes; every trajectory below starts from that point.</p></div>
+
+<div class="section"><h2>The Projection · Three Trajectories, One Target</h2>
+<div class="chartwrap">
+<svg viewBox="0 0 880 320" role="img" aria-label="Citywide PCI projections 2026 to 2038 under three funding scenarios">
+  <g font-family="JetBrains Mono, monospace" font-size="10" fill="#7a7164">
+    <line x1="90" y1="270" x2="820" y2="270" stroke="#15130f" stroke-width="1.5"/>
+    <line x1="90" y1="30" x2="90" y2="270" stroke="#15130f" stroke-width="1.5"/>
+    <line x1="90" y1="222" x2="820" y2="222" stroke="#d8cdb8"/>
+    <line x1="90" y1="174" x2="820" y2="174" stroke="#d8cdb8"/>
+    <line x1="90" y1="126" x2="820" y2="126" stroke="#d8cdb8"/>
+    <line x1="90" y1="30"  x2="820" y2="30"  stroke="#d8cdb8"/>
+    <text x="78" y="274" text-anchor="end">50</text>
+    <text x="78" y="226" text-anchor="end">55</text>
+    <text x="78" y="178" text-anchor="end">60</text>
+    <text x="78" y="130" text-anchor="end">65</text>
+    <text x="78" y="82"  text-anchor="end">70</text>
+    <text x="78" y="34"  text-anchor="end">75</text>
+    <text x="90" y="288">2026</text>
+    <text x="673" y="288" text-anchor="middle">2036</text>
+    <text x="790" y="288" text-anchor="middle">2038</text>
+    <text x="22" y="150" transform="rotate(-90 22 150)" text-anchor="middle" letter-spacing="1.5">CITYWIDE PCI</text>
+  </g>
+  <line x1="90" y1="78" x2="820" y2="78" stroke="#9c2b21" stroke-width="1.5" stroke-dasharray="7 5"/>
+  <text x="820" y="72" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#9c2b21" letter-spacing="1">STATUTORY TARGET · PCI 70 BY 2036</text>
+  <polyline points="90,183.6 673,78 790,78" fill="none" stroke="#9c2b21" stroke-width="2.5" stroke-dasharray="3 4"/>
+  <polyline points="90,183.6 790,154.8" fill="none" stroke="#4a6a86" stroke-width="3"/>
+  <polyline points="90,183.6 790,212.4" fill="none" stroke="#8a7d63" stroke-width="3"/>
+  <circle cx="90" cy="183.6" r="5" fill="#15130f"/>
+  <circle cx="790" cy="154.8" r="5" fill="#4a6a86"/>
+  <circle cx="790" cy="212.4" r="5" fill="#8a7d63"/>
+  <circle cx="673" cy="78" r="5" fill="#9c2b21"/>
+  <g font-family="JetBrains Mono, monospace" font-size="12" font-weight="700">
+    <text x="100" y="176" fill="#15130f">59</text>
+    <text x="800" y="150" fill="#4a6a86">62</text>
+    <text x="800" y="217" fill="#8a7d63">56</text>
+  </g>
+  <g font-family="JetBrains Mono, monospace" font-size="10" letter-spacing=".5">
+    <text x="500" y="112" fill="#9c2b21" font-weight="700">REQUIRES ~$37.6M/YR</text>
+    <text x="500" y="150" fill="#4a6a86" font-weight="700">PLAN + MEASURE FF · ~$29.6M/YR</text>
+    <text x="500" y="242" fill="#8a7d63" font-weight="700">BASELINE PLAN ALONE · ~$20.3M/YR</text>
+  </g>
+</svg>
+<div class="chartnote">Endpoints as published by the city (staff report Figure 1); the paths between them are drawn straight and are illustrative only. Annual dollar figures are the city's 12-year averages, not flat allocations. Construction cost escalation modeled at 3%/yr.</div>
+</div>
+<div class="realloc" style="margin-top:18px;margin-bottom:0">
+<div class="rc"><div class="n">56</div><div class="t">PCI in 2038 with the <b>baseline plan only</b> — condition <b>declines</b> from today</div></div>
+<div class="rc"><div class="n">62</div><div class="t">PCI in 2038 <b>with Measure FF added</b> — an improvement, but 8 points short</div></div>
+<div class="rc"><div class="n">$8M</div><div class="t">Additional <b>per year</b> needed to hit 70 on schedule — roughly $96M over the horizon</div></div>
+<div class="rc"><div class="n">0</div><div class="t">Modeled scenarios in which the <b>funded</b> program reaches 70 within 12 years</div></div>
+</div></div>
+
+<div class="section"><h2>The City's Own Words</h2>
+<div class="callout"><div class="src">Office of the City Manager · Item 10 · July 7 2026 · pp. 11–12, 17</div>
+<p>Under the baseline plan alone, staff project that citywide condition <b>declines</b> from 59 to about 56 by 2038, because construction cost escalation outruns revenue growth. Adding Measure FF turns the line upward — to roughly <b>62</b>.</p>
+<p>Staff then state plainly that <b>neither scenario reaches a PCI of 70 within the 12-year projection period</b>, and that closing the gap would take about <b>$37.6 million a year</b> — roughly $8 million more than the adopted program provides. The report closes by saying staff will "continue to evaluate additional funding sources and scope adjustments to close the remaining gap."</p></div>
+<p class="note">This is the strongest available evidence on Berkeley's street funding, and it is the city's own. Note what it is <em>not</em>: it is not an argument that the streets don't need work. It is an argument that a dedicated tax was sold on a specific numeric promise, and the first plan built on that tax does not deliver it.</p></div>
+
+<div class="section"><h2>What Was Adopted · Two Programs, One Network</h2>
+<table><thead><tr><th>Component</th><th class="r">Sections</th><th class="r">Centerline miles</th><th class="r">Project cost</th><th class="r">Cost / mile</th></tr></thead>
+<tbody>
+<tr><td class="pname">Five-Year Street Rehabilitation Plan<div class="cnote">Baseline program. Street selection driven by StreetSaver's Weighted Effectiveness Ratio — pavement life gained per dollar. Favors streets in fair condition.</div></td><td class="r">353</td><td class="r">55.15</td><td class="r">$88,620,962</td><td class="r">$1.61M</td></tr>
+<tr><td class="pname">Measure FF Five-Year CIP Plan<div class="cnote">Targets streets scoring below PCI 50 — the long-deferred segments a cost-effectiveness algorithm skips. Also funds sidewalks, safety and environmental work not counted here.</div></td><td class="r">54</td><td class="r">9.51</td><td class="r">$42,119,935</td><td class="r">$4.43M</td></tr>
+<tr class="tot"><td class="pname">Combined street rehabilitation</td><td class="r">407</td><td class="r">64.66</td><td class="r">$130,740,897</td><td class="r">$2.02M</td></tr>
+</tbody></table>
+<p class="note" style="margin-top:16px">The ratio in the last column is the finding. Measure FF pays <b>2.8&times; per mile</b> for the streets Berkeley let go — $4.43M against $1.61M. That is deferred maintenance priced, and it is consistent with the city's own life-cycle curve, which puts the penalty for delay at roughly 8&times;. The backlog is projected to grow from $330M to $406M between 2025 and 2029 <em>while</em> the city spends about $29.6M a year on it.</p></div>
+
+<div class="section"><h2>Funding · Seven Sources, One Escalator</h2>
+<table><thead><tr><th>Fund</th><th>Source</th><th class="r">FY2027</th><th class="r">FY2031</th><th class="r">5-year total</th></tr></thead>
+<tbody>
+<tr><td>501</td><td class="pname">CIP / Council Policy on Adequate Street Maintenance<div class="cnote">Res. 70,456-N.S., July 26 2022 — $8M/yr General Fund commitment, inflation-adjusted. The only line that grows.</div></td><td class="r">$8,487,200</td><td class="r">$9,552,418</td><td class="r">$45,059,697</td></tr>
+<tr><td>134</td><td class="pname">Measure BB — Local Streets &amp; Roads</td><td class="r">$2,980,000</td><td class="r">$2,980,000</td><td class="r">$14,900,000</td></tr>
+<tr><td>127</td><td class="pname">State SB 1 transportation taxes</td><td class="r">$2,195,303</td><td class="r">$2,195,303</td><td class="r">$10,976,515</td></tr>
+<tr><td>601</td><td class="pname">Zero Waste Fund<div class="cnote">Offsets pavement damage from collection vehicles.</div></td><td class="r">$2,000,000</td><td class="r">$2,000,000</td><td class="r">$10,000,000</td></tr>
+<tr><td>501</td><td class="pname">Capital Improvement Fund</td><td class="r">$1,925,000</td><td class="r">$1,925,000</td><td class="r">$9,625,000</td></tr>
+<tr><td>616</td><td class="pname">Clean Storm Fund<div class="cnote">Cross drains at intersections. Excluded from the $91.3M actually available for rehabilitation.</div></td><td class="r">$1,000,000</td><td class="r">$1,000,000</td><td class="r">$5,000,000</td></tr>
+<tr><td>133</td><td class="pname">Measure F vehicle registration fee</td><td class="r">$155,000</td><td class="r">$155,000</td><td class="r">$775,000</td></tr>
+<tr class="tot"><td></td><td class="pname">Total baseline funding</td><td class="r">$18,742,503</td><td class="r">$19,807,721</td><td class="r">$96,336,212</td></tr>
+</tbody></table>
+<p class="note" style="margin-top:16px">Six of seven sources are flat in nominal terms across all five years. Only the Council-policy line escalates, at 3.0%/yr — so total program funding grows <b>1.4% a year</b> while the city models construction inflation at <b>3%</b>. The program loses purchasing power every year by design. Measure FF is on a separate track: ~$15M/yr for 14 years, allocated 45% streets / 15% sidewalks / 30% safety / 10% environmental and fees. The five-year FF program totals $92.3M — about $17M more than five years of collections, reflecting FY2026 revenue carried forward and front-loaded into FY2027.</p></div>
+
+<div class="section"><h2>February vs. July · What Changed, and What Was Missing</h2>
+<div class="realloc" style="margin-bottom:16px">
+<div class="rc"><div class="n">$0</div><div class="t">Measure FF dollars shown anywhere in the <b>Feb 4 briefing</b> — ~32% of the real program</div></div>
+<div class="rc"><div class="n">None</div><div class="t">PCI projections in the Feb briefing, despite being <b>standard StreetSaver output</b></div></div>
+<div class="rc"><div class="n">None</div><div class="t">Mention of the <b>$330M deferred backlog</b> in the Feb briefing</div></div>
+<div class="rc"><div class="n">+$6.8M</div><div class="t">Baseline funding added between Feb draft and July adoption</div></div>
+</div>
+<div class="body">
+<p>The February 4 informational briefing to the FITES policy committee presented the paving program as a $89.5M / 54.78-mile plan funded from six sources, one of them marked TBD. It stated the policy target of PCI 70 and the mid-50s current condition on the same slide, and then never connected them. A reader of that deck could not learn that the city had modeled the target and found it unreachable, nor that a voter-approved tax roughly a third the size of the baseline program existed and was being planned in parallel.</p>
+<p>By July the numbers had firmed: baseline funding rose to $96.3M (Clean Storm resolved at $1M/yr; the CIP and Council-policy lines both revised upward), the plan grew to 55.15 miles and $88.6M, and Measure FF appeared as a companion resolution. The projection, the backlog figure, and the $8M/yr shortfall all surfaced for the first time in the adoption packet — five months after the public briefing and three weeks before the vote.</p>
+</div></div>
+
+<div class="section"><h2>The Commission Asked · Staff Declined</h2>
+<div class="callout" style="border-left-color:var(--accent2)"><div class="src">Transportation &amp; Infrastructure Commission · May 21 2026 · Vote 7–0–0–1–1</div>
+<p>The commission voted <b>unanimously</b> to recommend the plan <em>with amendments</em>: integrate Measure FF and baseline paving dollars into one program, and restore Claremont Avenue, Oxford Street and northern Telegraph Avenue for paving and multimodal safety work.</p>
+<p>Staff declined all three. The two programs remain formally separate ("developed on a separate but complementary track"). Council adopted the staff version on July 7.</p></div>
+<div class="removed" style="margin-top:16px">
+<div><span class="x">DEFERRED</span><b>Claremont Avenue</b> <span class="dim">— scheduled for FY2027 under the prior plan; a fatal collision occurred on the corridor in 2025. Now waits on an Alameda County flood-control bypass that will trench ~3,700 linear feet of the roadway, with completion estimated 2031. Dig-once rationale is sound; the wait is six more years.</span></div>
+<div><span class="x">DEFERRED</span><b>Oxford Street</b> <span class="dim">— High-Injury Network; was programmed for FY2028. Held pending the Oxford for All project, whose Council referral grew from $400,000 (June 2025) to $2.5M (December 2025).</span></div>
+<div><span class="x">DEFERRED</span><b>Telegraph Avenue</b> (Bancroft–Dwight) <span class="dim">— held pending CAR FREE Telegraph, a $1.325M January 2026 referral for feasibility and conceptual design, with construction estimated at $12–17M in later phases. Pedestrianization has been under study since 2022.</span></div>
+</div>
+<p class="note">Each individual deferral has a defensible engineering rationale. The pattern is the point: the corridors carrying the most traffic and the worst injury history are the ones whose repaving is contingent on other, larger, unfunded projects — and they drop out of the measurable program while the PCI clock runs.</p></div>
+
+<div class="section"><h2>Delivery Record · The Acceleration Is Real</h2>
+<table><thead><tr><th>Fiscal year</th><th class="r">Centerline miles paved</th><th>Context</th></tr></thead>
+<tbody>
+<tr><td class="pname">FY2019 (incl. FY2018)</td><td class="r">5.3</td><td class="cnote" style="margin:0">Averaging 2.7/yr</td></tr>
+<tr><td class="pname">FY2020</td><td class="r">2.6</td><td></td></tr>
+<tr><td class="pname">FY2021</td><td class="r">1.9</td><td class="cnote" style="margin:0">Low point</td></tr>
+<tr><td class="pname">FY2022</td><td class="r">2.6</td><td class="cnote" style="margin:0">Council adopts the $8M/yr General Fund policy, July 2022</td></tr>
+<tr><td class="pname">FY2023</td><td class="r">7.0</td><td></td></tr>
+<tr><td class="pname">FY2024</td><td class="r">10.7</td><td></td></tr>
+<tr><td class="pname">FY2025</td><td class="r">8.4</td><td></td></tr>
+<tr><td class="pname">FY2026 (projected)</td><td class="r">10.3</td><td class="cnote" style="margin:0">FY2024–26 total: 29.4 miles</td></tr>
+</tbody></table>
+<div class="body" style="margin-top:16px">
+<p>BeTH's position is not that nothing has changed. The 2022 General Fund commitment roughly quadrupled annual output, from a 2–3 mile historical average to 8–11 miles. Councilmember Blackaby's claim on July 7 that the new plan doubles the prior five years is approximately right depending on the baseline chosen: against FY2021–25 actuals (30.6 miles) the 64.66-mile plan is 2.1&times;; against FY2022–26 (39.0 miles) it is 1.7&times;.<span class="conf hi">High</span></p>
+<p>The problem is that quadrupling output still leaves the network losing ground without Measure FF, and gaining only six points with it. That is what a $330M backlog on a $1.2B asset does to a $30M annual program.</p>
+</div></div>
+
+<div class="section"><h2>Where the Numbers Don't Reconcile</h2>
+<div class="gaps">
+<div class="gap"><div class="t">$4.05M unexplained in the FF plan<span class="conf mod">Moderate</span></div><p>The staff report's Measure FF summary (Table 4) puts five-year street rehabilitation at $42,119,935. The itemized project list in Attachment 2 totals $38,064,984. The difference is $4,054,951, unexplained in the report. Per year the direction flips: FY2027's project list runs $517k <span class="neg">above</span> Table 4, FY2028–30 run $1.67M, $2.34M and $560k <span class="pos">below</span> it, and FY2031 matches to the dollar — which argues against a uniform soft-cost adder.</p></div>
+<div class="gap"><div class="t">"Over $139 million"<span class="conf hi">High</span></div><p>The Fiscal Impacts section states the combined five-year street budget "totals over $139 million." The two component figures in the same report — $96,336,212 and $42,119,935 — sum to $138,456,147. Small, but it is the headline dollar figure of the item.</p></div>
+<div class="gap"><div class="t">No per-street cost basis published<span class="conf unk">Unknown</span></div><p>Every one of the 407 street sections carries an estimated cost, but the report publishes no unit rates, no contingency assumption at the section level, and no reconciliation to recent bid results. The only stated reserve is a program-level ~3% against asphalt price volatility — thin, on a five-year horizon the city itself escalates at 3% a year.</p></div>
+<div class="gap"><div class="t">Exhibit labeling errors<span class="conf hi">High</span></div><p>The FY2031 Measure FF exhibit page is headed "Edwards Byron Street Rehab Project — Fiscal Year 2030." The adopting resolution cites "Resolution No. 70,2040-N.S." where it means 70,204. Immaterial to the dollars; material to how carefully a 70-page adoption packet is being read before a vote.</p></div>
+</div></div>
+
+<div class="section"><h2>How This Connects</h2>
+<div class="body">
+<p><b>Measure T1 quietly stopped paying for paving.</b> In September 2025, on the consent calendar, Council removed the <b>$3.95M T1 Streets Contribution to Annual Paving</b> from the Measure T1 Phase 2 list, with the note that other funding had been identified. The FY2027–31 plan adopted ten months later lists seven funding sources. T1 is not among them. The "other funding" was, in substance, the General Fund. <a href="index.html" style="color:var(--accent)">See the T1 tracker &rarr;</a><span class="conf hi">High</span></p>
+<p><b>The pattern across three measures.</b> T1 (2016, $100M) promised 76 infrastructure projects; 21 of 37 Phase 2 projects remain unfinished nine years on, five were cut to design-only, and the required six-month financial reporting has lapsed. Measure FF (2024, ~$267M) promised PCI 70 by 2036; the first plan built on it projects 62. In each case the measure passed on a specific, checkable commitment, and the shortfall surfaced years later inside a technical document rather than in the reporting the measure required.</p>
+<p><b>What it means for November 2026.</b> Berkeley is asking voters for a 0.5% district sales tax and a $300M general obligation bond. The paving analysis is the cleanest available test of the city's capacity to convert a dedicated revenue stream into a stated outcome — and the city's own answer, published three weeks before the July vote, is that it falls about $8M/yr short. The argument against the November measures is not that the need is fabricated; the $330M backlog is real and documented. It is that Berkeley has not yet demonstrated it can hit a number it put on a ballot.</p>
+</div></div>
+
+<div class="section"><h2>What to Watch</h2>
+<div class="gaps">
+<div class="gap"><div class="t">SAFE STREETS Citizen Oversight Committee</div><p>First annual report due fall 2026. Measure FF requires reporting on streets paved, cost per mile, changes in citywide PCI, the PCI of every street, and a rolling five-year schedule. Whether that report restates the 62-not-70 projection in plain language is the near-term test of the oversight structure.</p></div>
+<div class="gap"><div class="t">The next biennial update</div><p>The Street Maintenance Policy requires Council to readopt the five-year plan biennially. Staff have said changes will be made September–December 2027. If construction inflation continues to outrun the 1.4%/yr funding growth, the 2028 plan buys fewer miles for more money.</p></div>
+<div class="gap"><div class="t">Claremont, Oxford, Telegraph</div><p>All three are promised a return to the paving program "once scope, funding and timing are sufficiently defined." None has a date. Track whether they reappear in the FY2029–2033 plan.</p></div>
+<div class="gap"><div class="t">The $8M/yr gap</div><p>Staff commit only to "continue to evaluate additional funding sources and scope adjustments." Watch whether that becomes a request for another measure — and whether the PCI-70 statutory deadline of December 31, 2036 is ever formally acknowledged as missed.</p></div>
+</div></div>
+
+<div class="foot">PRIMARY SOURCES · Five-Year Street Rehabilitation and Measure FF Plans for Fiscal Years 2027-2031, Item 10, Action Calendar, Berkeley City Council, July 7 2026 (staff report, Resolution, Exhibits A–B, Attachment 2; 70 pp.) · FITES 5-Year Paving Informational Briefing, February 4 2026 · Transportation &amp; Infrastructure Commission agenda and action, May 21 2026 · Street Rehabilitation and Maintenance Policy, Res. 70,204-N.S., Jan 25 2022 · Adequate General Fund Contribution for Street Maintenance, Res. 70,456-N.S., July 26 2022 · Berkeley Municipal Code Ch. 7.11 (Measure FF / SAFE STREETS) · 2024 Pavement Management Program Update (PTAP-25) · City Auditor, <em>Rocky Road: Berkeley Streets at Risk and Significantly Underfunded</em>, Nov 19 2020 · Resolution updating the Measure T1 Phase 2 project list, Sept 16 2025.<br/><br/>
+CONFIDENCE · Dollar figures, mileage, PCI values and the $8M/yr gap are transcribed directly from the July 7 2026 staff report. Cost-per-mile ratios, funding growth rates and the reconciliation discrepancies are BeTH calculations from those published figures and are reproducible. The chart shows city-published endpoints only; intermediate paths are illustrative. Where a figure could not be verified, it is labeled Unknown rather than estimated.<br/><br/>
+Berkeley Transparency Hub · civic accountability project · corrections welcome.</div>
+
+</div></body></html>
